@@ -1,0 +1,47 @@
+{# params: section, dance_round, final_tables_per_dance #}
+{% if final_tables_per_dance %}
+<table class="skating-table">
+  <style>
+.skating-table th:nth-child({{ section.adjudicators|length|add:"1" }}),
+.skating-table td:nth-child({{ section.adjudicators|length|add:"1" }}) {
+border-right: .1rem solid var(--primary);
+}
+  </style>
+  <thead>
+    <tr>
+      <th></th>
+      <th colspan="{{ section.adjudicators|length }}">Platzierungen</th>
+      <th colspan="{{ dance_round.competitors|length }}">Skating</th>
+      <th>Platz</th>
+    </tr>
+  </thead>
+  {% for dance, final_table in final_tables_per_dance %}
+  <thead>
+    <tr>
+      <th>{{ dance.id }}</th>
+      {% for adjudicator in section.adjudicators %}
+      <th>{{ adjudicator }}</th>
+      {% endfor %}
+      {% for competitor in dance_round.competitors %}
+      {% if forloop.first %}
+      <th>1</th>
+      {% else %}
+      <th>1-{{ forloop.counter }}</th>
+      {% endif %}
+      {% endfor %}
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for index, row in final_table.items %}
+    <tr>
+      <th>{{ index }}</th>
+      {% for column_name, cell_data in row.items %}
+      <td>{{ cell_data }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+  {% endfor %}
+</table>
+{% endif %}

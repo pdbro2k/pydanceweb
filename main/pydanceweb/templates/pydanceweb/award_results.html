@@ -1,0 +1,35 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>{{ award.name }} - Ergebnisse</h2>
+{% if award_table %}
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      {% for index, row in award_table.items %}
+      {% if forloop.counter == 1 %}
+      {% for column_name, cell_data in row.items %}
+      {% if forloop.revcounter > 2 %}
+      <th>Turnier {{ forloop.counter }}</th>
+      {% endif %}
+      {% endfor %}
+      {% endif %}
+      {% endfor %}
+      <th>Summe</th>
+      <th>Platz</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for index, row in award_table.items %}
+    <tr>
+      <th>{{ index }}</th>
+      {% for column_name, cell_data in row.items %}
+      <td>{{ cell_data }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

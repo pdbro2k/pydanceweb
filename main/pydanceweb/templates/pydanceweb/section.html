@@ -1,0 +1,39 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>{{ section.name }}</h2>
+<form id="section_{{section.id}}">
+  {% csrf_token %}
+  <fieldset>
+    <dl>
+      <dt>Tänze</dt>
+      <dd>
+        {% include "pydanceweb/joined_id_list.html" with list=section.dances %}
+        {% if section.additional_dances %}
+        <i>+ {% include "pydanceweb/joined_id_list.html" with list=section.additional_dances %}</i>
+        {% endif %}
+      </dd>
+      <dt>Wertungsrichter</dt>
+      <dd>{% include "pydanceweb/joined_list.html" with list=section.adjudicators %}</dd>
+      <dt>{{ section.competitors|length }} Teilnehmer</dt>
+      <dd>{% include "pydanceweb/joined_list.html" with list=section.competitors %}</dd>
+    </dl>
+    <div class="row">
+      {% for dance_round in dance_rounds %}
+      <a href="{% url 'handle_round' section.id dance_round.id %}" class="button">{{dance_round.name}}</a>
+      {% endfor %}
+    </div>
+    {% if not section.dances %}
+    {% elif not dance_rounds %}
+    <a href="{% url 'handle_round' section.id next_round_id %}" class="button">erste Runde vorbereiten</a>
+    {% elif last_round.is_finished and last_round.is_final %}
+    <a href="{% url 'show_results'  section.id %}" class="button">Ergebnisse ansehen</a>
+    {% elif last_round.is_finished %}
+    <a href="{% url 'handle_round' section.id next_round_id %}" class="button">nächste Runde vorbereiten</a>
+    {% elif last_round.is_running %}
+    {% endif %}
+  </fieldset>
+</form>
+<script type="text/javascript">
+</script>
+{% endblock %}

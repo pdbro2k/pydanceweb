@@ -1,0 +1,23 @@
+{# params: section, callback_table #}
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      {% for adjudicator in section.adjudicators %}
+      <th>{{ adjudicator }}</th>
+      {% endfor %}
+      <th>Kreuze</th>
+      <th>Platz</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for index, row in callback_table.items %}
+    <tr>
+      <th>{{ index }}</th>
+      {% for column_name, cell_data in row.items %}
+      <td>{{ cell_data }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

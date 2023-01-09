@@ -1,0 +1,3 @@
+{% for item in list %}
+{{ item.id }}{% if not forloop.last %}, {% endif %}
+{% endfor %}

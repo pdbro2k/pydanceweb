@@ -1,0 +1,35 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>{{ section.name }} - {{ dance_round.name }}</h2>
+<div class="row">
+  <a href="{% url 'handle_round' section.id dance_round.id %}" class="button">zur Runde</a>
+</div>
+<form method="post">
+  {% csrf_token %}
+  {% for heat in heats %}
+  <fieldset class="heat">
+      <h3>{{ dance_id }} - Heat {{ heat.no }}/{{ heats|length }}</h3>
+      <div class="row">
+          <div class="six columns callback_mark_wrapper">
+              <h4>Paar</h4>
+              {% for competitor in heat.competitors %}
+              {% if heats|length > 1 %}
+              <input type="checkbox" class="callback_mark" name="competitors" id="{{ competitor }}" value="{{ competitor }}"/>
+              {% else %}
+              <input type="checkbox" name="competitors" id="{{ competitor }}" value="{{ competitor }}"/>
+              {% endif %}
+              <label for="{{ competitor }}">{{ competitor }}</label>
+              {% endfor %}
+          </div>
+      </div>
+    </fieldset>
+    {% endfor %}
+
+    {% if heats|length > 1 %}
+    <div class="controls">
+      <button type="submit">Auswahl in letztem Heat tanzen lassen</button>
+    </div>
+    {% endif %}
+</form>
+{% endblock %}

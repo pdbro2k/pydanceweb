@@ -1,0 +1,47 @@
+<form id="section_{{section.id}}" class="dance_section">
+  <fieldset>
+    <h3>{{ section.name }}</h3>
+    <dl>
+      <dt>Tänze</dt>
+      <dd>
+        {% include "pydanceweb/joined_id_list.html" with list=section.dances %}
+        {% if section.additional_dances %}
+        <i>+ {% include "pydanceweb/joined_id_list.html" with list=section.additional_dances %}</i>
+        {% endif %}
+      </dd>
+      <dt>Wertungsrichter</dt>
+      <dd id="adjudicator_count_{{section.id}}">{{ section.adjudicators|length }}</dd>
+      <dt>Teilnehmer</dt>
+      <dd id="competitor_count_{{section.id}}">{{ section.competitors|length }}</dd>
+    </dl>
+    {% load custom_tags %}
+    {% if section.is_finished or section.dances|length == 0 %}
+    <a href="{% url 'handle_section' section.id %}" target="_blank" class="button no-print">beendet</a>
+    {% elif dance_rounds_per_section|get_item:section.id %}
+    {% for dance_round in dance_rounds_per_section|get_item:section.id %}
+    {% if forloop.last %}
+    <a href="{% url 'handle_round' section.id dance_round.id %}" class="button no-print">
+      {{ dance_round.name }}
+      {% if dance_round.is_running %}
+      fortsetzen
+      {% else %}
+      vorbereitet
+      {% endif %}
+    </a>
+    {% endif %}
+    {% endfor %}
+    {% else %}
+    <a href="{% url 'handle_section' section.id %}" target="_blank" class="button no-print">Vorbereiten</a>
+    {% endif %}
+  </fieldset>
+  <script type="text/javascript">
+var adjudicatorCount{{section.id}} = document.getElementById('adjudicator_count_{{section.id}}');
+if (Number(adjudicatorCount{{section.id}}.textContent) % 2 == 0) {
+  adjudicatorCount{{section.id}}.classList.add("red");
+}
+var competitorCount{{section.id}} = document.getElementById('competitor_count_{{section.id}}');
+if (Number(competitorCount{{section.id}}.textContent) == 0) {
+  competitorCount{{section.id}}.classList.add("red");
+}
+  </script>
+</form>

@@ -1,0 +1,24 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+{% for section_group in conf.section_groups %}
+<div class="dance_section_group page-break-after">
+    <h2>{{ section_group.name }}</h2>
+    {% for section in section_group.sections %}
+    {% include "pydanceweb/section_box.html" with sections=section %}
+    {% endfor %}
+</div>
+{% endfor %}
+<h2>Weitere</h2>
+{% for section in ungrouped_sections %}
+{% include "pydanceweb/section_box.html" with sections=section %}
+{% endfor %}
+
+{% if conf.awards %}
+<h2>Sonderwertungen</h2>
+{% for award in conf.awards %}
+<a href="{% url 'handle_award' award.id %}" class="button">{{ award.name }} ausrechnen</a>
+{% endfor %}
+{% endif %}
+
+{% endblock %}

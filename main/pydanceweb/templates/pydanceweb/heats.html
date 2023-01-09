@@ -1,0 +1,31 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>{{ dance_round.name }} ({{ section.id }})</h2>
+<form>
+  {% for heat in heats %}
+  <fieldset class="heat">
+      <h3>{{ dance_id }} - Heat {{ heat.no }}/{{ heats|length }}</h3>
+      <div class="row">
+          <div class="callback_mark_wrapper">
+              <h4>Paar</h4>
+              {% for competitor in heat.competitors %}
+              <input type="checkbox" name="competitors" id="{{ competitor }}"/>
+              <label for="{{ competitor }}">{{ competitor }}</label>
+              {% endfor %}
+          </div>
+      </div>
+    </fieldset>
+    {% endfor %}
+    <div class="controls">
+      {% if dance_id != first_dance_id %}
+      <a href="{% url 'show_heats' section.id dance_round.id first_dance_id %}" class="button">zum vorherigen Tanz</a>
+      {% endif %}
+      {% if dance_id != last_dance_id %}
+      <a href="{% url 'show_heats' section.id dance_round.id last_dance_id %}" class="button">zum nächsten Tanz</a>
+      {% else %}
+      <a href="{% url 'show_index' %}" class="button">zur Rundenübersicht</a>
+      {% endif %}
+    </div>
+</form>
+{% endblock %}

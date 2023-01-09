@@ -1,0 +1,9 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>Ergebnisübersicht</h2>
+{% if results_table %}
+{% autoescape off %}{{ results_table }}{% endautoescape %}
+{% endif %}
+
+{% endblock %}

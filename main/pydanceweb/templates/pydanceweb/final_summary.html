@@ -1,0 +1,49 @@
+{# params: section, final_round, final_summary #}
+{% if final_summary %}
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th colspan="{{ final_round.dances|length }}">Tänze</th>
+      <th>Summe</th>
+      <th>Platz</th>
+      <th colspan="{{ final_round.competitors|length }}">Skating (Regel 10)</th>
+      <th colspan="{{ final_round.competitors|length }}">Skating (Regel 11)</th>
+    </tr>
+  </thead>
+  <thead>
+    <tr>
+      <th></th>
+      {% for dance in final_round.dances %}
+      <th>{{ dance.id }}</th>
+      {% endfor %}
+      <th></th>
+      <th></th>
+      {% for competitor in final_round.competitors %}
+      {% if forloop.first %}
+      <th>1</th>
+      {% else %}
+      <th>1-{{ forloop.counter }}</th>
+      {% endif %}
+      {% endfor %}
+      {% for competitor in final_round.competitors %}
+      {% if forloop.first %}
+      <th>1</th>
+      {% else %}
+      <th>1-{{ forloop.counter }}</th>
+      {% endif %}
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for index, row in final_summary.items %}
+    <tr>
+      <th>{{ index }}</th>
+      {% for column_name, cell_data in row.items %}
+      <td>{{ cell_data }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}

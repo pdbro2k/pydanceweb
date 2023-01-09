@@ -1,0 +1,34 @@
+{% extends 'pydanceweb/base_round.html' %}
+
+{% block form_inputs %}
+      {% if not dance_round.is_final %}
+      <dt>Kreuzvorgabe</dt>
+      <dd>
+        <select name="callback_wish" id="callback_wish">
+        {% for competitor in dance_round.competitors %}
+        {% if forloop.counter >= 3 %}
+        <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+        {% endif %}
+        {% endfor %}
+        </select>
+      </dd>
+      <dt>Heatgröße</dt>
+      <dd>
+        <select name="heat_size" id="heat_size">
+        {% for heat_size, heat_count in heat_counts_per_size.items %}
+          <option value="{{ heat_size }}">max. {{ heat_size }} (= {{ heat_count }} Heats)</option>
+        {% endfor %}
+        </select>
+      </dd>
+      {% endif %}
+{% endblock %}
+
+{% block form_controls %}
+    <button class="submit">
+      {% if dance_round.is_final %}
+      Runde starten
+      {% else %}
+      Runde vorbereiten
+      {% endif %}
+    </button>
+{% endblock %}

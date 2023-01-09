@@ -1,0 +1,27 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>Wertungsrichter {{ adjudicator_id }}</h2>
+{% if callback_marks %}
+<div class="success">
+{{ callback_marks|length }} Kreuze wurden erfolgreich gespeichert!
+</div>
+{% elif final_marks %}
+<div class="success">
+Die Wertungen wurden erfolgreich gespeichert!
+</div>
+{% endif %}
+<div class="controls">
+  {% if next_dance %}
+  {% if dance_round.is_final %}
+  <a href="{% url 'judge_final' adjudicator_id dance_round.section_id next_dance.id %}" class="button">zum nächsten Tanz</a>
+  {% else %}
+  <a href="{% url 'judge_heats' adjudicator_id dance_round.section_id dance_round.id next_dance.id %}" class="button">zum nächsten Tanz</a>
+  {% endif %}
+  {% else %}
+  <a href="{% url 'show_current_adjudicator_rounds' adjudicator_id %}" class="button">zur Rundenübersicht</a>
+  {% endif %}
+</div>
+<script type="text/javascript">
+</script>
+{% endblock %}

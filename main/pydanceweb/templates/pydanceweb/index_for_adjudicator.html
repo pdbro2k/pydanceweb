@@ -1,0 +1,16 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>Wertungsrichter {{ adjudicator_id }}</h2>
+{% for dance_round in current_rounds %}
+<div>
+  {% if dance_round.is_final %}
+  <a href="{% url 'judge_final' adjudicator_id dance_round.section_id %}" class="button">{{ dance_round.name }} ({{ dance_round.section_id }})</a>
+  {% else %}
+  <a href="{% url 'judge_heats' adjudicator_id dance_round.section_id dance_round.id %}" class="button">{{ dance_round.name }} ({{ dance_round.section_id }})</a>
+  {% endif %}
+</div>
+{% endfor %}
+<script type="text/javascript">
+</script>
+{% endblock %}

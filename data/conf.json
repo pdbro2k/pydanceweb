@@ -1,0 +1,107 @@
+{
+    "name": "Mainzer Fastnachtsturnier 2023",
+    "dances": {
+        "LW": "Langsamer Walzer",
+        "TG": "Tango",
+        "WW": "Wiener Walzer",
+        "SF": "Slowfox",
+        "QS": "Quickstep",
+        "SB": "Samba",
+        "CC": "Cha-Cha-Cha",
+        "RB": "Rumba",
+        "PD": "Paso Doble",
+        "JV": "Jive",
+        "DF": "Discofox"
+    },
+    "sections": {
+        "LW": "Langsamer-Walzer-Turnier",
+        "TG": "Tangoturnier",
+        "WW": "Wiener-Walzer-Turnier",
+        "SF": "Slowfoxturnier",
+        "QS": "Quickstepturnier",
+        "SB": "Sambaturnier",
+        "CC": "Cha-Cha-Cha-Turnier",
+        "RB": "Rumbaturnier",
+        "PD": "Paso-Doble-Turnier",
+        "JV": "Jiveturnier",
+        "DF": "Discofoxturnier",
+        "Newcomer": "Newcomerwertung"
+    },
+    "dances_per_section": {
+        "LW": ["LW"],
+        "TG": ["TG"],
+        "WW": ["WW"],
+        "SF": ["SF"],
+        "QS": ["QS"],
+        "SB": ["SB"],
+        "CC": ["CC"],
+        "RB": ["RB"],
+        "PD": ["PD"],
+        "JV": ["JV"],
+        "DF": ["DF"],
+        "Newcomer": []
+    },
+    "section_groups": {
+        "STD": "Standardturniere",
+        "LAT": "Lateinturniere"
+    },
+    "sections_per_group": {
+        "STD": ["LW", "TG", "WW", "SF", "QS"],
+        "LAT": ["SB", "CC", "RB", "PD", "JV"]
+    },
+    "awards": {
+        "STDW": "Standardwertung",
+        "LATW": "Lateinwertung",
+        "GESW": "Gesamtwertung",
+        "10TW": "Zehn-Tänze-Wertung",
+        "NCW": "Newcomerwertung"
+    },
+    "sections_per_award": {
+        "STDW": [
+            {
+                "BEST": {
+                    "n": 3,
+                    "sections": ["LW", "TG", "WW", "SF", "QS"]
+                }
+            }
+        ],
+        "LATW": [
+            {
+                "BEST": {
+                    "n": 3,
+                    "sections": ["SB", "CC", "RB", "PD", "JV"]
+                }
+            }
+        ],
+        "GESW": [
+            {
+                "BEST": {
+                    "n": 3,
+                    "sections": ["LW", "TG", "WW", "SF", "QS"]
+                }
+            },
+            {
+                "BEST": {
+                    "n": 3,
+                    "sections": ["SB", "CC", "RB", "PD", "JV"]
+                }
+            }
+        ],
+        "10TW": ["LW", "TG", "WW", "SF", "QS", "SB", "CC", "RB", "PD", "JV"],
+        "NCW": [
+            "Newcomer",
+            {
+                "BEST": {
+                    "n": 2,
+                    "sections": ["LW", "TG", "WW", "SF", "QS"]
+                }
+            },
+            {
+                "BEST": {
+                    "n": 2,
+                    "sections": ["SB", "CC", "RB", "PD", "JV"]
+                }
+            }
+        ]
+    }
+}

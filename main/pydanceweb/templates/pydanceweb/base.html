@@ -1,0 +1,15 @@
+<html>
+<head>
+    <title>{{ conf.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  	<meta name="robots" content="noindex, nofollow" />
+    {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <link rel="stylesheet" href="{% static 'pydanceweb/style.css' %}">
+</head>
+<body>
+<h1>{{ conf.name }}</h1>
+{% block content %}
+{% endblock %}
+</body>
+</html>

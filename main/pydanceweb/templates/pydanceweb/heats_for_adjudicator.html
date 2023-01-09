@@ -1,0 +1,61 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>{{ dance_round.name }} ({{ dance_round.section_id }})</h2>
+<h3>Wertungsrichter {{ adjudicator_id }}</h3>
+<form method="post">
+  {% csrf_token %}
+  <p>Bitte insgesamt <b>{{ dance_round.callback_wish }} Kreuze</b> vergeben</p>
+  {% for heat in heats %}
+  <fieldset class="heat">
+      <h3>{{ dance_id }} - Heat {{ heat.no }}/{{ heats|length }}</h3>
+      <div class="row">
+          <div class="six columns callback_mark_wrapper">
+              <h4>Paar</h4>
+              {% for competitor in heat.competitors %}
+              {% if competitor in marked_competitors %}
+              <input type="checkbox" class="callback_mark" name="competitors" id="{{ competitor }}" value="{{ competitor }}" checked/>
+              {% else %}
+              <input type="checkbox" class="callback_mark" name="competitors" id="{{ competitor }}" value="{{ competitor }}"/>
+              {% endif %}
+              <label for="{{ competitor }}">{{ competitor }}</label>
+              {% endfor %}
+          </div>
+          <div class="six columns">
+              <h4>vormerken</h4>
+              {% for competitor in heat.competitors %}
+              <input type="checkbox" id="pencil_{{ competitor }}"/>
+              <label for="pencil_{{ competitor }}"></label>
+              {% endfor %}
+          </div>
+      </div>
+    </fieldset>
+    {% endfor %}
+
+    <div class="controls">
+      <p><span id="mark_count">0</span>/<span id="expected_mark_count">{{ dance_round.callback_wish }}</span> Kreuze vergeben</p>
+      <button type="submit">Abschicken</button>
+    </div>
+</form>
+<script type="text/javascript">
+function updateMarkCount() {
+  let markCountElem = document.getElementById("mark_count");
+  markCount = document.querySelectorAll('input[type="checkbox"].callback_mark:checked').length;
+  markCountElem.innerHTML = markCount;
+
+  let expectedMarkCount = Number(document.getElementById("expected_mark_count").innerHTML);
+  if (markCount != expectedMarkCount) {
+    markCountElem.classList.add("red");
+  } else {
+    markCountElem.classList.remove("red");
+  }
+};
+var markChecks = document.querySelectorAll('input[type="checkbox"].callback_mark');
+for (let i=0; i < markChecks.length; ++i ) {
+  markChecks[i].addEventListener('change', (event) => {
+    updateMarkCount();
+  })
+}
+updateMarkCount();
+</script>
+{% endblock %}

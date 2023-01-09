@@ -1,0 +1,521 @@
+from django.db import models
+from .pydance_objects import *
+from .pydance_tables import *
+from .award_calculator import *
+
+from glob import glob
+import json
+import os
+
+# generic helper functions
+def dump_json(json_dict, filepath):
+    with open(filepath, "w", encoding='utf8') as file:
+        json.dump(json_dict, file, indent=4)
+
+def read_json(filepath):
+    json_dict = {}
+    with open(filepath, "r", encoding='utf8') as file:
+        json_dict = json.load(file)
+    return json_dict
+
+def get_or_create_dir(dir_path):
+    if not os.path.isdir(dir_path):
+        os.makedirs(dir_path)
+    return dir_path
+
+def _get_data_path(section_id="", round_id=None):
+    app_data_path = '../app/data'
+    if section_id:
+        app_data_path += f'/sections/{section_id}'
+    if round_id:
+        app_data_path += f'/{round_id}'
+    return app_data_path
+
+# wrapper classes
+class Award(PyDanceObject):
+    def __init__(self, id, name=''):
+        super().__init__(id, name)
+
+class Heat:
+    """wrapper object for basic heat information (dance, no, competitors)"""
+    def __init__(self, dance, no, competitors):
+        self.dance = dance
+        self.no = no
+        self.competitors = competitors
+
+
+# DAO classes
+class Conf:
+    def __init__(self, name=''):
+        self.name = name
+        self.dances = []
+        self.sections = []
+        self.section_groups = []
+        self.awards = []
+        self.section_id_or_rules_per_award = []
+
+    def get_ungrouped_sections(self):
+        sections = self.sections.copy()
+        for section_group in self.section_groups:
+            for section in section_group.sections:
+                if section in sections:
+                    sections.remove(section)
+        return sections
+
+    def to_dict(self):
+        conf_dict = {}
+        conf_dict['name'] = self.name
+        conf_dict['dances'] = {dance.to_dict() for dance in self.dances}
+        conf_dict['sections'] = {section.id: section.name for section in self.sections}
+        conf_dict['dances_per_section'] = {section.id: [dance.id for dance in section.dances] for section in self.sections}
+        conf_dict['additional_dances_per_section'] = {section.id: [dance.id for dance in section.additional_dances] for section in self.sections}
+        conf_dict['section_groups'] = {section_group.id: section_group.name for section_group in self.section_groups}
+        conf_dict['sections_per_group'] = {section_group.id: [section.id for section in section_group.sections] for section_group in self.section_groups}
+        conf_dict['awards'] = {award.to_dict() for award in self.awards}
+        conf_dict['sections_per_award'] = self.section_id_or_rules_per_award
+        return conf_dict
+
+    def _get_dances(conf_dict):
+        if 'dances' in conf_dict:
+            dance_dict = conf_dict['dances']
+            return [Dance(dance_id, dance_dict[dance_id]) for dance_id in dance_dict]
+
+    @staticmethod
+    def from_dict(conf_dict):
+        conf = Conf(conf_dict['name'])
+        conf.dances = Conf._get_dances(conf_dict)
+
+        # get sections and add info from app/data
+        competitor_start_table = CompetitorStartTables.get()
+        adjudicator_start_table = AdjudicatorStartTables.get()
+        section_dict = conf_dict['sections']
+        for section_id in section_dict:
+            name = section_dict[section_id]
+            dances_per_section = conf_dict['dances_per_section']
+            dances = []
+            if section_id in dances_per_section:
+                for dance in conf.dances:
+                    if dance.id in dances_per_section[section_id]:
+                        dances.append(dance)
+            additional_dances = []
+            if 'additional_dances_per_section' in conf_dict:
+                additional_dances_per_section = conf_dict['additional_dances_per_section']
+                if section_id in additional_dances_per_section:
+                    for dance in conf.dances:
+                        if dance.id in additional_dances_per_section[section_id]:
+                            additional_dances.append(dance)
+            section = Section(section_id, name, dances, additional_dances)
+            initiated_section = Sections.get(section.id)
+            if initiated_section:
+                section = initiated_section
+            else:
+                if competitor_start_table:
+                    section.competitors = competitor_start_table.get_ids(section.id)
+                if adjudicator_start_table:
+                    section.adjudicators = adjudicator_start_table.get_ids(section.id)
+            conf.sections.append(section)
+
+        # get section groups
+        section_group_dict = conf_dict['section_groups']
+        for section_group_id in section_group_dict:
+            name = section_group_dict[section_group_id]#['name']
+            sections_per_group = conf_dict['sections_per_group']
+            sections = []
+            if section_group_id in sections_per_group:
+                for section in conf.sections:
+                    if section.id in sections_per_group[section_group_id]:
+                        sections.append(section)
+            conf.section_groups.append(SectionGroup(section_group_id, name, sections))
+
+        if 'awards' in conf_dict:
+            award_dict = conf_dict['awards']
+            conf.awards = [Award(award_id, award_dict[award_id]) for award_id in award_dict]
+        if 'sections_per_award' in conf_dict:
+            conf.section_id_or_rules_per_award = conf_dict['sections_per_award']
+        return conf
+
+    @staticmethod
+    def get():
+        return Conf.from_dict(read_json(f'{_get_data_path()}/conf.json'))
+
+    def save(self):
+        dump_json(self.to_dict(), f'{_get_data_path()}/conf.json')
+
+class CompetitorStartTables:
+    def _get_file_path():
+        return f'{_get_data_path()}/competitors.csv'
+
+    def get():
+        try:
+            return StartTable.read_csv(CompetitorStartTables._get_file_path())
+        except:
+            return
+
+class AdjudicatorStartTables:
+    def _get_file_path():
+        return f'{_get_data_path()}/adjudicators.csv'
+
+    def get():
+        try:
+            return AdjudicatorStartTable.read_csv(AdjudicatorStartTables._get_file_path())
+        except:
+            return
+
+class Dances:
+    def get(dance_id):
+        for dance in Conf.get().dances:
+            if dance.id == dance_id:
+                return dance
+
+class Sections:
+    def _get_file_path(section_id):
+        return f'{_get_data_path(section_id)}/section.json'
+
+    def get(section_id):
+        try:
+            return Section.from_dict(read_json(Sections._get_file_path(section_id)))
+        except:
+            return
+
+    def get_all():
+        return Conf.get().sections
+
+    def get_running(section_id=""):
+        sections = [Sections.get(section_id)] if section_id else Sections.get_all()
+        return [section for section in sections if section.is_running and not section.is_finished]
+
+    def get_finished(section_id=""):
+        sections = [Sections.get(section_id)] if section_id else Sections.get_all()
+        return [section for section in sections if section.is_finished]
+
+    def create(section_id):
+        for section in Conf.get().sections:
+            if section.id == section_id:
+                Sections.save(section)
+                return section
+
+    def save(section):
+        get_or_create_dir(_get_data_path(section.id))
+        dump_json(section.to_dict(), Sections._get_file_path(section.id))
+
+    def create_results(section):
+        # create place_df by getting the place per competitor from their respective last round
+        places_per_competitor = {}
+        for file in glob(f'{_get_data_path(section.id)}/[1-9]/{section.id}_[1-9]_results.csv'):
+            _place_column = 'place'
+            df = pd.read_csv(file, index_col=0)[_place_column].to_frame() # MEMO: the results may be either a CallbackMarkTable (for preliminary rounds) or a FinalSummary (for finals)
+            for competitor in df.index:
+                places_per_competitor[competitor] = df.at[competitor, _place_column]
+        place_df = pd.DataFrame.from_dict(places_per_competitor, orient='index', columns=[_place_column])
+        place_df.to_csv(f'{_get_data_path(section.id)}/results.csv')
+        return place_df
+
+    def get_results(section):
+        try:
+            return pd.read_csv(f'{_get_data_path(section.id)}/results.csv', index_col=0)
+        except:
+            # set place to 0 for all competitors
+            place_df = pd.DataFrame(index=section.competitors)
+            place_df['place'] = 1
+            return place_df
+
+class DanceRounds:
+    def _get_file_path(section_id, round_id):
+        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_round.json'
+
+    def get(section_id, round_id):
+        try:
+            return DanceRound.from_dict(read_json(DanceRounds._get_file_path(section_id, round_id)))
+        except:
+            return
+
+    def create_first(section_id):
+        section = Sections.get(section_id)
+        if not section:
+            # invalid section_id !!!
+            return
+        dance_round = DanceRound(DanceRounds._build_id(), DanceRounds._build_name())
+        dance_round.section_id = section.id
+        dance_round.dances = section.dances
+        dance_round.competitors = section.competitors
+        DanceRounds.save(dance_round)
+        return dance_round
+
+    def create_next(current_dance_round, callback_count, added_dance_ids=[]):
+        callback_option = CallbackMarkTables.get_callback_option(current_dance_round.section_id, current_dance_round.id, callback_count)
+        dance_round = DanceRound(DanceRounds._build_id(current_dance_round.id))
+        dance_round.name = DanceRounds._build_name(dance_round.id, callback_option.is_final)
+        dance_round.section_id = current_dance_round.section_id
+        dance_round.dances = current_dance_round.dances
+        for dance_id in added_dance_ids:
+            dance_round.dances.append(Dances.get(dance_id))
+        dance_round.competitors = [int(competitor) for competitor in callback_option.competitors]
+        if callback_option.is_final:
+            dance_round.is_final = True
+        DanceRounds.save(dance_round)
+        current_dance_round.is_running = False
+        current_dance_round.is_finished = True
+        DanceRounds.save(current_dance_round)
+        return dance_round
+
+    def _build_id(last_round_id=0):
+        return last_round_id + 1
+
+    def _build_name(round_id=1, is_final=False):
+        if is_final:
+            return 'Endrunde'
+        if round_id == 1:
+            return 'Vorrunde'
+        if round_id == 1:
+            return 'Zwischenrunde'
+        return f'{round_id - 1}. Zwischenrunde'
+
+    def get_all(section_id):
+        return [DanceRound.from_dict(read_json(file_path)) for file_path in glob(DanceRounds._get_file_path(section_id, "*"))]
+
+    def get_final(section_id):
+        for dance_round in DanceRounds.get_all(section_id):
+            if dance_round.is_final:
+                return dance_round
+
+    def get_running(section_id=""):
+        current_rounds = []
+        for section in Sections.get_running(section_id):
+            for dance_round in DanceRounds.get_all(section.id):
+                if dance_round.is_running and not dance_round.is_finished:
+                    current_rounds.append(dance_round)
+        return current_rounds
+
+    def save(dance_round):
+        get_or_create_dir(_get_data_path(dance_round.section_id, dance_round.id))
+        dump_json(dance_round.to_dict(), DanceRounds._get_file_path(dance_round.section_id, dance_round.id))
+
+class CallbackMarks:
+    def _get_file_path(adjudicator_id, section_id, round_id, dance_id=''):
+        if not dance_id:
+            dance_id = section_id # TODO: improve
+        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_{dance_id}_callback_marks_{adjudicator_id}.json'
+
+    def get(adjudicator_id, section_id, round_id, dance_id=''):
+        filepath = CallbackMarks._get_file_path(adjudicator_id, section_id, round_id, dance_id)
+        if os.path.exists(filepath):
+            data = read_json(filepath)
+            if 'competitors' in data:
+                return data['competitors']
+        return []
+
+    def save(adjudicator_id, competitors, section_id, round_id, dance_id=''):
+        dump_json({'competitors': competitors}, CallbackMarks._get_file_path(adjudicator_id, section_id, round_id, dance_id))
+
+class FinalMarks:
+    def _get_file_path(adjudicator_id, section_id, round_id, dance_id=''):
+        if not dance_id:
+            dance_id = section_id # TODO: improve
+        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_{dance_id}_final_marks_{adjudicator_id}.json'
+
+    def get(adjudicator_id, section_id, round_id, dance_id=''):
+        filepath = FinalMarks._get_file_path(adjudicator_id, section_id, round_id, dance_id)
+        if os.path.exists(filepath):
+            return read_json(filepath)
+        return {}
+
+    def save(adjudicator_id, final_marks, section_id, round_id, dance_id=''):
+        dump_json(final_marks, FinalMarks._get_file_path(adjudicator_id, section_id, round_id, dance_id))
+
+class CallbackMarkTables:
+    def _get_file_path(section_id, round_id):
+        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_results.csv'
+
+    def get(section_id, round_id):
+        try:
+            return CallbackMarkTable.read_csv(CallbackMarkTables._get_file_path(section_id, round_id))
+        except:
+            return
+
+    def get_all(section_id):
+        callback_mark_tables = []
+        for dance_round in DanceRounds.get_all(section_id):
+            if not dance_round.is_final:
+                callback_mark_tables.append(CallbackMarkTables.get(section_id, dance_round.id))
+        return callback_mark_tables
+
+    def create(section_id, round_id):
+        section = Sections.get(section_id)
+        dance_round = DanceRounds.get(section_id, round_id)
+        if not section or not dance_round:
+            # invalid
+            return
+        callback_table = CallbackMarkTable(dance_round.competitors, section.adjudicators)
+        for dance in dance_round.dances:
+            for adjudicator in section.adjudicators:
+                for marked_competitor in CallbackMarks.get(adjudicator, section_id, round_id, dance.id):
+                    callback_table.add_mark(marked_competitor, adjudicator)
+        callback_table.analyze()
+        CallbackMarkTables.save(callback_table, section_id, round_id)
+        return callback_table
+
+    def save(callback_table, section_id, round_id):
+        callback_table.to_csv(CallbackMarkTables._get_file_path(section_id, round_id))
+
+    def get_callback_option(section_id, round_id, callback_count):
+        dance_round = DanceRounds.get(section_id, round_id)
+        callback_table = CallbackMarkTables.get(section_id, round_id)
+        for callback_option in callback_table.get_callback_options():
+            if len(callback_option.competitors) == callback_count:
+                return callback_option
+
+class SkatingTables:
+    def _get_file_path(section_id, round_id, dance_id):
+        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_{dance_id}_results.csv'
+
+    def get(section_id, round_id, dance_id):
+        try:
+            return SkatingTable.read_csv(SkatingTables._get_file_path(section_id, round_id, dance_id))
+        except:
+            return
+
+    def create(section_id, round_id, dance_id):
+        section = Sections.get(section_id)
+        dance_round = DanceRounds.get(section_id, round_id)
+        if not section or not dance_round:
+            # invalid
+            return
+        skating_table = SkatingTable(dance_round.competitors, section.adjudicators)
+        for adjudicator in section.adjudicators:
+            final_marks = FinalMarks.get(adjudicator, section.id, dance_round.id, dance_id)
+            for competitor in dance_round.competitors:
+                if str(competitor) in final_marks:
+                    skating_table.set_mark(competitor, adjudicator, final_marks[str(competitor)])
+        skating_table.analyze()
+        SkatingTables.save(skating_table, section_id, round_id, dance_id)
+        return skating_table
+
+    def save(skating_table, section_id, round_id, dance_id):
+        skating_table.to_csv(SkatingTables._get_file_path(section_id, round_id, dance_id))
+
+class FinalSummaries:
+    def create(section_id):
+        final_round = DanceRounds.get_final(section_id)
+        skating_tables = []
+        for dance in final_round.dances:
+            skating_tables.append(SkatingTables.get(section_id, final_round.id, dance.id))
+        final_summary = FinalSummary(skating_tables)
+        final_summary.to_csv(f'{_get_data_path(section_id, final_round.id)}/{section_id}_{final_round.id}_results.csv')
+        return final_summary
+
+    def get(section_id):
+        final_round = DanceRounds.get_final(section_id)
+        try:
+            # MEMO: FinalSummary.read_csv() is not yet implemented !!!
+            return pd.read_csv(f'{_get_data_path(section_id, final_round.id)}/{section_id}_{final_round.id}_results.csv', index_col=0)
+        except:
+            return
+
+class Awards:
+    def _get_file_path(award_id):
+        return f'{_get_data_path()}/awards/{award_id}.csv'
+
+    def get(award_id):
+        for award in Conf.get().awards:
+            if award.id == award_id:
+                return award
+
+    def get_all():
+        return Conf.get().awards
+
+    def get_section_ids(award_id):
+        section_id_or_rules = Conf.get().section_id_or_rules_per_award[award_id]
+        return extract_section_ids(section_id_or_rules)
+
+    def get_results(award_id):
+        try:
+            return pd.read_csv(Awards._get_file_path(award_id), sep=',', encoding='utf8', index_col=0)
+        except:
+            return
+
+    def create_results(award_id):
+        section_id_or_rules = Conf.get().section_id_or_rules_per_award[award_id]
+        place_dfs_per_section_id = {}
+        for section_id in extract_section_ids(section_id_or_rules):
+            place_dfs_per_section_id[section_id] = Sections.get_results(Sections.get(section_id))
+        result_df = get_award_results(section_id_or_rules, place_dfs_per_section_id)
+        result_df.to_csv(Awards._get_file_path(award_id), sep=',', encoding='utf8')
+        return result_df
+
+class HeatTables:
+    def _get_file_path(section_id, round_id):
+        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_heats.csv'
+
+    def get(section_id, round_id):
+        try:
+            return HeatTable.read_csv(HeatTables._get_file_path(section_id, round_id))
+        except:
+            return
+
+    def create(section_id, round_id):
+        dance_round = DanceRounds.get(section_id, round_id)
+        if not dance_round:
+            # invalid
+            return
+        heat_table = HeatTable(dance_round.competitors, [dance.id for dance in dance_round.dances])
+        heat_table.randomize(dance_round.calc_heat_count(dance_round.max_heat_size))
+        HeatTables.save(heat_table, section_id, round_id)
+
+        # set running
+        dance_round.is_running = True
+        DanceRounds.save(dance_round)
+        section = Sections.get(section_id)
+        section.is_running = True
+        Sections.save(section)
+        return heat_table
+
+    def move_to_last_heat(heat_table, section_id, round_id, dance_id, competitors):
+        for competitor in competitors:
+            heat_table.change_heat(competitor, dance_id, heat_table.get_heat_count())
+        HeatTables.save(heat_table, section_id, round_id)
+
+    def merge_running():
+        # TODO: add section_ids as column group
+        current_rounds = [dance_round for dance_round in DanceRounds.get_running() if not dance_round.is_final]
+        if len(current_rounds) < 1:
+            return
+        merged_table = HeatTable().to_frame()
+        for dance_round in current_rounds:
+            table = HeatTables.get(dance_round.section_id, dance_round.id).to_frame()
+            if len(dance_round.dances) > 1:
+                table.columns = [f'{dance_round.section_id}_{dance.id}' for dance in dance_round.dances]
+            merged_table = merged_table.join(table, how="outer")
+        return merged_table.astype(object).fillna('-')
+
+    def save(heat_table, section_id, round_id):
+        heat_table.to_csv(HeatTables._get_file_path(section_id, round_id))
+
+class Heats:
+    def from_table(heat_table, dance):
+        heats = []
+        for heat_no in range(1, heat_table.get_heat_count() + 1):
+            heats.append(Heat(dance, heat_no, heat_table.get_heat(dance, heat_no)))
+        return heats
+
+class OverallResults:
+    def _get_file_path():
+        return f'{_get_data_path()}/results.csv'
+
+    def get():
+        try:
+            return pd.read_csv(OverallResults._get_file_path(), sep=',', encoding='utf8')
+        except:
+            return
+
+    def create():
+        df = pd.DataFrame()
+        for section in Sections.get_all():
+            result_df = Sections.get_results(section)
+            result_df[section.id] = result_df['place']
+            df = df.join(result_df[section.id].to_frame(), how='outer')
+        for award in Awards.get_all():
+            result_df = Awards.get_results(award.id)
+            result_df[award.id] = result_df['place']
+            df = df.join(result_df[award.id].to_frame(), how='outer')
+        df.to_csv(OverallResults._get_file_path(), sep=',', encoding='utf8')
+        return df

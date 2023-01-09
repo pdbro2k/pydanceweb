@@ -1,0 +1,56 @@
+{% extends 'pydanceweb/base_round.html' %}
+
+{% block links %}
+{% if dance_round.is_running %}
+<div class="row">
+  <a href="{% url 'handle_heats' dance_round.section_id dance_round.id %}" class="button">zu den Heats</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block form_controls %}
+    {% if dance_round.is_finished %}
+    {% elif dance_round.is_running %}
+    <div class="row">
+      <a href="{% url 'handle_round' section.id dance_round.id %}" class="button">Ergebnisse aktualisieren</a>
+      {% for adjudicator in section.adjudicators %}
+      <a href="{% url 'judge_heats' adjudicator section.id dance_round.id %}" target="_blank" class="button">Kreuze von {{ adjudicator }}</a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <a href="{% url 'handle_heats' dance_round.section_id dance_round.id %}" class="button">Runde starten</a>
+    {% endif %}
+{% endblock %}
+
+{% block round_analysis %}
+{% if callback_table %}
+<div class="row">
+  <div class="columns">
+    {% include "pydanceweb/callback_mark_table.html" with section=section callback_table=callback_table %}
+  </div>
+  {% if dance_round.is_running %}
+  <form class="columns" method="post" action="{% url 'handle_round' section.id dance_round.id|add:'1' %}">
+    {% csrf_token %}
+    <label for="callback_count">Wieviele Paare sollen weiterkommen?</label>
+    <select id="callback_count" name="callback_count">
+      {% for callback_option in callback_options %}
+      <option value="{{ callback_option.competitors|length }}">
+        {% if forloop.last %}
+        alle
+        {% else %}
+        {{ callback_option.competitors|length }}
+        {% endif %}
+        {% if callback_option.is_final %}
+        (= Endrunde)
+        {% endif %}
+      </option>
+      {% endfor %}
+    </select>
+    <div style="margin-left: 1rem;">
+      <button>nächste Runde vorbereiten</button>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

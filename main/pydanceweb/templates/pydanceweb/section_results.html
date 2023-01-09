@@ -1,0 +1,30 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>{{ section.name }} - Ergebnisse</h2>
+<div class="row">
+{% if place_table %}
+<div class="row">
+  {% include "pydanceweb/place_table.html" with place_table=place_table %}
+</div>
+{% endif %}
+<div class="row">
+  {% for dance_round, callback_table in callback_tables_per_round %}
+  <div class="columns">
+    <h3>{{dance_round.name}}</h3>
+    {% include "pydanceweb/callback_mark_table.html" with section=section callback_table=callback_table %}
+  </div>
+  {% endfor %}
+  <div class="columns">
+    <h3>{{final_round.name}}</h3>
+    <div class="row">
+      {% include "pydanceweb/final_summary.html" with section=section final_round=final_round final_summary=final_summary %}
+    </div>
+    <div class="row">
+      {% include "pydanceweb/skating_tables_per_dance.html" with section=section dance_round=final_round final_tables_per_dance=final_tables_per_dance %}
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+</script>
+{% endblock %}

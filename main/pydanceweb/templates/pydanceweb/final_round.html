@@ -1,0 +1,34 @@
+{% extends 'pydanceweb/base_round.html' %}
+
+{% block form_controls %}
+    {% if dance_round.is_finished %}
+    {% elif dance_round.is_running %}
+      <a href="{% url 'handle_round' section.id dance_round.id %}" class="button">Ergebnisse aktualisieren</a>
+    {% for adjudicator in section.adjudicators %}
+    <a href="{% url 'judge_final' adjudicator section.id %}" target="_blank" class="button">Wertungen von {{ adjudicator }}</a>
+    {% endfor %}
+    {% else %}
+    <button class="submit">Runde starten</button>
+    {% endif %}
+{% endblock %}
+
+{% block round_analysis %}
+<div class="row">
+  <div class="columns">
+    <div class="row">
+      {% include "pydanceweb/final_summary.html" with section=section final_round=dance_round final_summary=final_summary %}
+    </div>
+    <div class="row">
+      {% include "pydanceweb/skating_tables_per_dance.html" with section=section dance_round=dance_round final_tables_per_dance=final_tables_per_dance %}
+    </div>
+  </div>
+  {% if dance_round.is_running %}
+  <form class="columns" method="post" action="{% url 'finalize_section' section.id %}">
+    {% csrf_token %}
+    <div style="margin-left: 1rem;">
+      <button>Turnier auswerten und beenden</button>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

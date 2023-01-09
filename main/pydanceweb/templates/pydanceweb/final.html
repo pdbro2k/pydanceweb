@@ -1,0 +1,55 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>Endrunde ({{ dance_round.section_id }})</h2>
+<h3>Wertungsrichter {{ adjudicator_id }}</h3>
+<p>Bitte nur die Plätze 1-{{ dance_round.competitors|length }} vergeben und keine Platzierung doppelt.</p>
+<form method="post">
+  {% csrf_token %}
+  <fieldset class="final">
+      <h3>{{ dance_id }}</h3>
+      <div class="row">
+          <div class="six columns">
+              <h4>Paar</h4>
+              {% for competitor in dance_round.competitors %}
+              <label for="{{ competitor }}">{{ competitor }}</label>
+              {% endfor %}
+          </div>
+          <div class="six columns placement-wrapper">
+              <h4>Platz</h4>
+              {% load custom_tags %}
+              {% for competitor in dance_round.competitors %}
+              <input type="number" name="{{ competitor }}" id="{{ competitor }}" min="1" max="{{ dance_round.competitors|length }}" value="{{ final_marks|get_item:competitor }}"/>
+              {% endfor %}
+          </div>
+      </div>
+    </fieldset>
+    <div class="controls">
+      <button type="submit">Abschicken</button>
+    </div>
+</form>
+<script type="text/javascript">
+function validate() {
+    let placements = [];
+    let expectedPlacements = [];
+    let placementInputs = document.querySelectorAll('input[type="number"]');
+    for (let i=0; i < placementInputs.length; ++i ) {
+      placements.push(Number(placementInputs[i].value));
+      expectedPlacements.push(i + 1);
+    }
+    placements.sort(function(a,b){
+      return a - b;
+    });
+    return placements.toString() === expectedPlacements.toString();
+}
+
+let placementInputs = document.querySelectorAll('input[type="number"]');
+for (let i=0; i < placementInputs.length; ++i ) {
+  placementInputs[i].addEventListener('change', (event) => {
+    console.log(validate());
+    document.querySelectorAll('button[type="submit"]')[0].disabled = !validate();
+  })
+}
+document.querySelectorAll('button[type="submit"]')[0].disabled = !validate();
+</script>
+{% endblock %}

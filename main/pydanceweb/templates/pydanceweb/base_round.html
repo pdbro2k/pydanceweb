@@ -1,0 +1,36 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>{{ section.name }} - {{ dance_round.name }}</h2>
+{% block links %}
+{% endblock %}
+<form method="post">
+  {% csrf_token %}
+  <fieldset>
+    <dl>
+      <dt>Tänze</dt>
+      <dd>
+        {% if dance_round.dances %}
+        {% include "pydanceweb/joined_id_list.html" with list=dance_round.dances %}
+        {% else %}
+        -
+        {% endif %}
+      </dd>
+
+      <dt>Wertungsrichter</dt>
+      <dd>{% include "pydanceweb/joined_list.html" with list=section.adjudicators %}</dd>
+      <dt>{{ dance_round.competitors|length }} Teilnehmer</dt>
+      <dd>{% include "pydanceweb/joined_list.html" with list=dance_round.competitors %}</dd>
+
+      {% block form_inputs %}
+      {% endblock %}
+    </dl>
+    {% block form_controls %}
+    {% endblock %}
+  </fieldset>
+</form>
+{% block round_analysis %}
+{% endblock %}
+{% block scripts %}
+{% endblock %}
+{% endblock %}
