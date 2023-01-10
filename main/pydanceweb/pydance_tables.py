@@ -223,7 +223,7 @@ class CallbackMarkTable:
                 last_callback = callback
 
                 # build CallBackOption (and check if it results in a Final)
-                is_final = place <= 6
+                is_final = (place <= 6 and len(competitors) <= 8)
                 callback_options.append(CallbackOption(competitors, is_final))
         return callback_options
 
