@@ -20,5 +20,7 @@
 <a href="{% url 'handle_award' award.id %}" class="button">{{ award.name }} ausrechnen</a>
 {% endfor %}
 {% endif %}
+<h2>Ergebnisübersicht</h2>
+<a href="{% url 'finalize' %}" class="button">zur Ergebnisübersicht</a>
 
 {% endblock %}
