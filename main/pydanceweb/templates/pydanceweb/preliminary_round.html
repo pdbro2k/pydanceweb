@@ -8,6 +8,11 @@
 {% endif %}
 {% endblock %}
 
+{% block additional_round_info %}
+<dt>Kreuzvorgabe</dt>
+<dd>{{ dance_round.callback_wish }}</dd>
+{% endblock %}
+
 {% block form_controls %}
     {% if dance_round.is_finished %}
     {% elif dance_round.is_running %}

@@ -19,15 +19,19 @@ def render_frame(frame):
 # admin views
 def show_tournament_desk_index(request):
     conf = Conf.get()
-    sections = conf.sections
     dance_rounds_per_section = {}
-    for section in sections:
-        dance_rounds_per_section[section.id] = DanceRounds.get_all(section.id)
+    for i, section in enumerate(conf.sections):
+        initiated_section = Sections.get(section.id)
+        if initiated_section:
+            conf.sections[i] = initiated_section
+            for j, section_group in enumerate(conf.section_groups):
+                for k, grouped_section in enumerate(conf.section_groups[j].sections):
+                    if grouped_section == initiated_section:
+                        conf.section_groups[j].sections[k] = initiated_section
+            dance_rounds_per_section[initiated_section.id] = DanceRounds.get_all(section.id)
     context = {
         'conf': conf,
         'ungrouped_sections': conf.get_ungrouped_sections(),
-        'running_sections': Sections.get_running(),
-        'finished_sections': Sections.get_finished(),
         'dance_rounds_per_section': dance_rounds_per_section,
     }
     return render(request, 'pydanceweb/index_for_tournament_desk.html', context)
@@ -36,6 +40,9 @@ def handle_section(request, section_id):
     section = Sections.get(section_id)
     if not section:
         section = Sections.create(section_id)
+    if len(section.dances) == 0:
+        section.is_finished = True
+        Sections.save(section)
     dance_rounds = DanceRounds.get_all(section_id)
     last_round = dance_rounds[-1] if dance_rounds else None
     next_round_id = last_round.id + 1 if last_round else 1
@@ -62,6 +69,9 @@ def _prepare_round(request, section_id, round_id):
         callback_count = int(request.POST["callback_count"])
         added_dance_ids = request.POST.getlist("add_dances")
         dance_round = DanceRounds.create_next(current_dance_round, callback_count, added_dance_ids)
+
+    if not dance_round:
+        return HttpResponse('Runde nicht gefunden')
     context = {
         'conf': Conf.get(),
         'section': section,
@@ -164,11 +174,14 @@ def finalize_section(request, section_id):
 
 # => calc awards
 def handle_award(request, award_id):
+    award = Awards.get(award_id)
+    if not award:
+        return HttpResponse('Sonderwertung nicht gefunden')
     results = Awards.create_results(award_id)
     return show_award_results(request, award_id)
 
 def finalize(request):
-    results_table = OverallResults.create().astype('Int64').astype(object).fillna('-')
+    results_table = OverallResults.create()
     context = {
         'conf': Conf.get(),
         'results_table': results_table.to_html(),
@@ -177,18 +190,10 @@ def finalize(request):
 
 # adjudicator views
 def show_current_adjudicator_rounds(request, adjudicator_id):
-    conf = Conf.get()
-    # TODO: move to models
-    current_rounds = []
-    for section in conf.sections:
-        if adjudicator_id in section.adjudicators and section.is_running:
-            for dance_round in DanceRounds.get_all(section.id):
-                if dance_round.is_running:
-                    current_rounds.append(dance_round)
     context = {
-        'conf': conf,
+        'conf': Conf.get(),
         'adjudicator_id': adjudicator_id,
-        'current_rounds': current_rounds,
+        'current_rounds': DanceRounds.get_running(adjudicator_id),
     }
     return render(request, 'pydanceweb/index_for_adjudicator.html', context)
 
@@ -298,32 +303,34 @@ def show_heats(request, section_id, round_id, dance_id=""):
 def show_results(request, section_id):
     section = Sections.get(section_id)
     place_table = Sections.get_results(section)
-    preliminary_rounds = [dance_round for dance_round in DanceRounds.get_all(section_id) if not dance_round.is_final]
-    callback_tables = [render_frame(table.to_frame()) for table in CallbackMarkTables.get_all(section_id)]
-    final_round = DanceRounds.get_final(section.id)
 
     context = {
         'conf': Conf.get(),
         'section': section,
-        'callback_tables_per_round': zip(preliminary_rounds, callback_tables),
-        'place_table': render_frame(place_table),
-        'final_round': final_round,
     }
 
-    if final_round:
-        final_tables = []
-        for dance in final_round.dances:
-            final_tables.append( render_frame(SkatingTables.create(section.id, final_round.id, dance.id).to_frame()) )
-        context['final_tables_per_dance'] = zip(final_round.dances, final_tables)
-        if len(final_round.dances) > 1:
-            final_summary = FinalSummaries.get(section.id)
-            context['final_summary'] = render_frame(final_summary)
+    if place_table is not None:
+        preliminary_rounds = [dance_round for dance_round in DanceRounds.get_all(section_id) if not dance_round.is_final]
+        callback_tables = [render_frame(table.to_frame()) for table in CallbackMarkTables.get_all(section_id)]
+        final_round = DanceRounds.get_final(section.id)
+        context['callback_tables_per_round'] = zip(preliminary_rounds, callback_tables)
+        context['place_table'] = render_frame(place_table)
+        context['final_round'] = final_round
+
+        if final_round:
+            final_tables = []
+            for dance in final_round.dances:
+                final_tables.append( render_frame(SkatingTables.create(section.id, final_round.id, dance.id).to_frame()) )
+            context['final_tables_per_dance'] = zip(final_round.dances, final_tables)
+            if len(final_round.dances) > 1:
+                final_summary = FinalSummaries.get(section.id)
+                context['final_summary'] = render_frame(final_summary)
     return render(request, 'pydanceweb/section_results.html', context)
 
 # => calc awards
 def show_award_results(request, award_id):
     award = Awards.get(award_id)
-    award_table = Awards.get_results(award_id).astype('Int64')
+    award_table = Awards.get_results(award_id)
     context = {
         'conf': Conf.get(),
         'award': award,

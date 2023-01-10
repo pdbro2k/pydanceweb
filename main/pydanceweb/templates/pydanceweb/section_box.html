@@ -15,7 +15,7 @@
       <dd id="competitor_count_{{section.id}}">{{ section.competitors|length }}</dd>
     </dl>
     {% load custom_tags %}
-    {% if section.is_finished or section.dances|length == 0 %}
+    {% if section.is_finished %}
     <a href="{% url 'handle_section' section.id %}" target="_blank" class="button no-print">beendet</a>
     {% elif dance_rounds_per_section|get_item:section.id %}
     {% for dance_round in dance_rounds_per_section|get_item:section.id %}

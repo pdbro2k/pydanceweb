@@ -21,6 +21,8 @@
       <dd>{% include "pydanceweb/joined_list.html" with list=section.adjudicators %}</dd>
       <dt>{{ dance_round.competitors|length }} Teilnehmer</dt>
       <dd>{% include "pydanceweb/joined_list.html" with list=dance_round.competitors %}</dd>
+      {% block additional_round_info %}
+      {% endblock %}
 
       {% block form_inputs %}
       {% endblock %}

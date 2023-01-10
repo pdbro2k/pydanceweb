@@ -49,9 +49,15 @@ def get_award_results(section_id_or_rules, place_dfs_per_section_id):
                     n = rule['n']
                 else:
                     n = len(section_ids)
-                place_dfs = [place_dfs_per_section_id[section_id] for section_id in section_ids]
+                place_dfs = []
+                for section_id in section_ids:
+                    if section_id not in place_dfs_per_section_id:
+                        return pd.DataFrame() # since section isn't finished
+                    place_dfs.append(place_dfs_per_section_id[section_id])
                 df = _join_and_rename_columns(df, _build_best_n_frame(place_dfs, n))
         elif isinstance(section_id_or_rule, str):
+            if section_id_or_rule not in place_dfs_per_section_id:
+                return pd.DataFrame() # since section isn't finished
             df = _join_and_rename_columns(df, place_dfs_per_section_id[section_id_or_rule])
     df['total'] = sum([df[x] for x in df.columns])
     df['place'] = 0
@@ -64,4 +70,4 @@ def get_award_results(section_id_or_rules, place_dfs_per_section_id):
             current_sum = row['total']
             current_place = n
         df.at[competitor, 'place'] = current_place
-    return df
+    return df.astype('int64')

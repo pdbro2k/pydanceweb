@@ -24,7 +24,7 @@ def get_or_create_dir(dir_path):
     return dir_path
 
 def _get_data_path(section_id="", round_id=None):
-    app_data_path = '../app/data'
+    app_data_path = 'data'
     if section_id:
         app_data_path += f'/sections/{section_id}'
     if round_id:
@@ -105,14 +105,12 @@ class Conf:
                         if dance.id in additional_dances_per_section[section_id]:
                             additional_dances.append(dance)
             section = Section(section_id, name, dances, additional_dances)
-            initiated_section = Sections.get(section.id)
-            if initiated_section:
-                section = initiated_section
-            else:
-                if competitor_start_table:
-                    section.competitors = competitor_start_table.get_ids(section.id)
-                if adjudicator_start_table:
-                    section.adjudicators = adjudicator_start_table.get_ids(section.id)
+
+            # add competitors and andjudicators
+            if competitor_start_table:
+                section.competitors = competitor_start_table.get_ids(section.id)
+            if adjudicator_start_table:
+                section.adjudicators = adjudicator_start_table.get_ids(section.id)
             conf.sections.append(section)
 
         # get section groups
@@ -142,51 +140,58 @@ class Conf:
         dump_json(self.to_dict(), f'{_get_data_path()}/conf.json')
 
 class CompetitorStartTables:
-    def _get_file_path():
+    def _get_filepath():
         return f'{_get_data_path()}/competitors.csv'
 
     def get():
-        try:
-            return StartTable.read_csv(CompetitorStartTables._get_file_path())
-        except:
-            return
+        filepath = CompetitorStartTables._get_filepath()
+        if os.path.exists(filepath):
+            return StartTable.read_csv(filepath)
 
 class AdjudicatorStartTables:
-    def _get_file_path():
+    def _get_filepath():
         return f'{_get_data_path()}/adjudicators.csv'
 
     def get():
-        try:
-            return AdjudicatorStartTable.read_csv(AdjudicatorStartTables._get_file_path())
-        except:
-            return
+        filepath = AdjudicatorStartTables._get_filepath()
+        if os.path.exists(filepath):
+            return AdjudicatorStartTable.read_csv(filepath)
 
 class Dances:
     def get(dance_id):
+        # do not store dances separately but always read them from conf
         for dance in Conf.get().dances:
             if dance.id == dance_id:
                 return dance
 
 class Sections:
-    def _get_file_path(section_id):
-        return f'{_get_data_path(section_id)}/section.json'
+    def _get_dir(section_id):
+        return f'{_get_data_path(section_id)}'
+
+    def _get_filepath(section_id):
+        return f'{Sections._get_dir(section_id)}/section.json'
+
+    def _get_results_path(section_id):
+        return f'{Sections._get_dir(section_id)}/results.csv'
 
     def get(section_id):
-        try:
-            return Section.from_dict(read_json(Sections._get_file_path(section_id)))
-        except:
-            return
+        filepath = Sections._get_filepath(section_id)
+        if os.path.exists(filepath):
+            return Section.from_dict(read_json(filepath))
 
     def get_all():
-        return Conf.get().sections
+        sections = []
+        for section in Conf.get().sections: # use sort order from conf
+            section = Sections.get(section.id)
+            if section:
+                sections.append(section)
+        return sections
 
-    def get_running(section_id=""):
-        sections = [Sections.get(section_id)] if section_id else Sections.get_all()
-        return [section for section in sections if section.is_running and not section.is_finished]
+    def get_running():
+        return [section for section in Sections.get_all() if section.is_running and not section.is_finished]
 
-    def get_finished(section_id=""):
-        sections = [Sections.get(section_id)] if section_id else Sections.get_all()
-        return [section for section in sections if section.is_finished]
+    def get_finished():
+        return [section for section in Sections.get_all() if section.is_finished and len(section.dances) > 0]
 
     def create(section_id):
         for section in Conf.get().sections:
@@ -195,10 +200,14 @@ class Sections:
                 return section
 
     def save(section):
-        get_or_create_dir(_get_data_path(section.id))
-        dump_json(section.to_dict(), Sections._get_file_path(section.id))
+        if not section:
+            return
+        get_or_create_dir(Sections._get_dir(section.id))
+        dump_json(section.to_dict(), Sections._get_filepath(section.id))
 
     def create_results(section):
+        if not section:
+            return
         # create place_df by getting the place per competitor from their respective last round
         places_per_competitor = {}
         for file in glob(f'{_get_data_path(section.id)}/[1-9]/{section.id}_[1-9]_results.csv'):
@@ -207,32 +216,36 @@ class Sections:
             for competitor in df.index:
                 places_per_competitor[competitor] = df.at[competitor, _place_column]
         place_df = pd.DataFrame.from_dict(places_per_competitor, orient='index', columns=[_place_column])
-        place_df.to_csv(f'{_get_data_path(section.id)}/results.csv')
+        get_or_create_dir(Sections._get_dir(section.id))
+        place_df.to_csv(Sections._get_results_path(section.id))
         return place_df
 
     def get_results(section):
-        try:
-            return pd.read_csv(f'{_get_data_path(section.id)}/results.csv', index_col=0)
-        except:
-            # set place to 0 for all competitors
-            place_df = pd.DataFrame(index=section.competitors)
-            place_df['place'] = 1
-            return place_df
+        if not section:
+            return
+        filepath = Sections._get_results_path(section.id)
+        if os.path.exists(filepath):
+            return pd.read_csv(filepath, index_col=0)
+        # set place to 1 for all competitors if there are no results yet
+        place_df = pd.DataFrame(index=section.competitors)
+        place_df['place'] = 1
+        return place_df
 
 class DanceRounds:
-    def _get_file_path(section_id, round_id):
-        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_round.json'
+    def _get_dir(section_id, round_id):
+        return _get_data_path(section_id, round_id)
+
+    def _get_filepath(section_id, round_id):
+        return f'{DanceRounds._get_dir(section_id, round_id)}/{section_id}_{round_id}_round.json'
 
     def get(section_id, round_id):
-        try:
-            return DanceRound.from_dict(read_json(DanceRounds._get_file_path(section_id, round_id)))
-        except:
-            return
+        filepath = DanceRounds._get_filepath(section_id, round_id)
+        if os.path.exists(filepath):
+            return DanceRound.from_dict(read_json(filepath))
 
     def create_first(section_id):
         section = Sections.get(section_id)
         if not section:
-            # invalid section_id !!!
             return
         dance_round = DanceRound(DanceRounds._build_id(), DanceRounds._build_name())
         dance_round.section_id = section.id
@@ -242,6 +255,8 @@ class DanceRounds:
         return dance_round
 
     def create_next(current_dance_round, callback_count, added_dance_ids=[]):
+        if not current_dance_round:
+            return
         callback_option = CallbackMarkTables.get_callback_option(current_dance_round.section_id, current_dance_round.id, callback_count)
         dance_round = DanceRound(DanceRounds._build_id(current_dance_round.id))
         dance_round.name = DanceRounds._build_name(dance_round.id, callback_option.is_final)
@@ -271,33 +286,38 @@ class DanceRounds:
         return f'{round_id - 1}. Zwischenrunde'
 
     def get_all(section_id):
-        return [DanceRound.from_dict(read_json(file_path)) for file_path in glob(DanceRounds._get_file_path(section_id, "*"))]
+        return [DanceRound.from_dict(read_json(filepath)) for filepath in glob(DanceRounds._get_filepath(section_id, "*"))]
 
     def get_final(section_id):
         for dance_round in DanceRounds.get_all(section_id):
             if dance_round.is_final:
                 return dance_round
 
-    def get_running(section_id=""):
+    def get_running(adjudicator_id=""):
         current_rounds = []
-        for section in Sections.get_running(section_id):
+        for section in Sections.get_running():
+            if adjudicator_id and adjudicator_id not in section.adjudicators:
+                continue
             for dance_round in DanceRounds.get_all(section.id):
                 if dance_round.is_running and not dance_round.is_finished:
                     current_rounds.append(dance_round)
         return current_rounds
 
     def save(dance_round):
-        get_or_create_dir(_get_data_path(dance_round.section_id, dance_round.id))
-        dump_json(dance_round.to_dict(), DanceRounds._get_file_path(dance_round.section_id, dance_round.id))
+        get_or_create_dir(DanceRounds._get_dir(dance_round.section_id, dance_round.id))
+        dump_json(dance_round.to_dict(), DanceRounds._get_filepath(dance_round.section_id, dance_round.id))
 
 class CallbackMarks:
-    def _get_file_path(adjudicator_id, section_id, round_id, dance_id=''):
+    def _get_filepath(adjudicator_id, section_id, round_id, dance_id=''):
+        dance_round = DanceRounds.get(section_id, round_id)
+        if not dance_round:
+            return
         if not dance_id:
-            dance_id = section_id # TODO: improve
-        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_{dance_id}_callback_marks_{adjudicator_id}.json'
+            dance_id = dance_round.dances[0].id
+        return f'{DanceRounds._get_dir(section_id, round_id)}/{section_id}_{round_id}_{dance_id}_callback_marks_{adjudicator_id}.json'
 
     def get(adjudicator_id, section_id, round_id, dance_id=''):
-        filepath = CallbackMarks._get_file_path(adjudicator_id, section_id, round_id, dance_id)
+        filepath = CallbackMarks._get_filepath(adjudicator_id, section_id, round_id, dance_id)
         if os.path.exists(filepath):
             data = read_json(filepath)
             if 'competitors' in data:
@@ -305,32 +325,36 @@ class CallbackMarks:
         return []
 
     def save(adjudicator_id, competitors, section_id, round_id, dance_id=''):
-        dump_json({'competitors': competitors}, CallbackMarks._get_file_path(adjudicator_id, section_id, round_id, dance_id))
+        get_or_create_dir(DanceRounds._get_dir(section_id, round_id))
+        dump_json({'competitors': competitors}, CallbackMarks._get_filepath(adjudicator_id, section_id, round_id, dance_id))
 
 class FinalMarks:
-    def _get_file_path(adjudicator_id, section_id, round_id, dance_id=''):
+    def _get_filepath(adjudicator_id, section_id, round_id, dance_id=''):
+        dance_round = DanceRounds.get(section_id, round_id)
+        if not dance_round:
+            return
         if not dance_id:
-            dance_id = section_id # TODO: improve
-        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_{dance_id}_final_marks_{adjudicator_id}.json'
+            dance_id = dance_round.dances[0].id
+        return f'{DanceRounds._get_dir(section_id, round_id)}/{section_id}_{round_id}_{dance_id}_final_marks_{adjudicator_id}.json'
 
     def get(adjudicator_id, section_id, round_id, dance_id=''):
-        filepath = FinalMarks._get_file_path(adjudicator_id, section_id, round_id, dance_id)
+        filepath = FinalMarks._get_filepath(adjudicator_id, section_id, round_id, dance_id)
         if os.path.exists(filepath):
             return read_json(filepath)
         return {}
 
     def save(adjudicator_id, final_marks, section_id, round_id, dance_id=''):
-        dump_json(final_marks, FinalMarks._get_file_path(adjudicator_id, section_id, round_id, dance_id))
+        get_or_create_dir(DanceRounds._get_dir(section_id, round_id))
+        dump_json(final_marks, FinalMarks._get_filepath(adjudicator_id, section_id, round_id, dance_id))
 
 class CallbackMarkTables:
-    def _get_file_path(section_id, round_id):
-        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_results.csv'
+    def _get_filepath(section_id, round_id):
+        return f'{DanceRounds._get_dir(section_id, round_id)}/{section_id}_{round_id}_results.csv'
 
     def get(section_id, round_id):
-        try:
-            return CallbackMarkTable.read_csv(CallbackMarkTables._get_file_path(section_id, round_id))
-        except:
-            return
+        filepath = CallbackMarkTables._get_filepath(section_id, round_id)
+        if os.path.exists(filepath):
+            return CallbackMarkTable.read_csv(filepath)
 
     def get_all(section_id):
         callback_mark_tables = []
@@ -343,7 +367,6 @@ class CallbackMarkTables:
         section = Sections.get(section_id)
         dance_round = DanceRounds.get(section_id, round_id)
         if not section or not dance_round:
-            # invalid
             return
         callback_table = CallbackMarkTable(dance_round.competitors, section.adjudicators)
         for dance in dance_round.dances:
@@ -355,7 +378,8 @@ class CallbackMarkTables:
         return callback_table
 
     def save(callback_table, section_id, round_id):
-        callback_table.to_csv(CallbackMarkTables._get_file_path(section_id, round_id))
+        get_or_create_dir(DanceRounds._get_dir(section_id, round_id))
+        callback_table.to_csv(CallbackMarkTables._get_filepath(section_id, round_id))
 
     def get_callback_option(section_id, round_id, callback_count):
         dance_round = DanceRounds.get(section_id, round_id)
@@ -365,20 +389,18 @@ class CallbackMarkTables:
                 return callback_option
 
 class SkatingTables:
-    def _get_file_path(section_id, round_id, dance_id):
-        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_{dance_id}_results.csv'
+    def _get_filepath(section_id, round_id, dance_id):
+        return f'{DanceRounds._get_dir(section_id, round_id)}/{section_id}_{round_id}_{dance_id}_results.csv'
 
     def get(section_id, round_id, dance_id):
-        try:
-            return SkatingTable.read_csv(SkatingTables._get_file_path(section_id, round_id, dance_id))
-        except:
-            return
+        filepath = SkatingTables._get_filepath(section_id, round_id, dance_id)
+        if os.path.exists(filepath):
+            return SkatingTable.read_csv(filepath)
 
     def create(section_id, round_id, dance_id):
         section = Sections.get(section_id)
         dance_round = DanceRounds.get(section_id, round_id)
         if not section or not dance_round:
-            # invalid
             return
         skating_table = SkatingTable(dance_round.competitors, section.adjudicators)
         for adjudicator in section.adjudicators:
@@ -391,36 +413,46 @@ class SkatingTables:
         return skating_table
 
     def save(skating_table, section_id, round_id, dance_id):
-        skating_table.to_csv(SkatingTables._get_file_path(section_id, round_id, dance_id))
+        get_or_create_dir(DanceRounds._get_dir(section_id, round_id))
+        skating_table.to_csv(SkatingTables._get_filepath(section_id, round_id, dance_id))
 
 class FinalSummaries:
+    def _get_filepath(section_id, round_id):
+        return f'{DanceRounds._get_dir(section_id, round_id)}/{section_id}_{round_id}_results.csv'
+
     def create(section_id):
         final_round = DanceRounds.get_final(section_id)
         skating_tables = []
         for dance in final_round.dances:
             skating_tables.append(SkatingTables.get(section_id, final_round.id, dance.id))
         final_summary = FinalSummary(skating_tables)
-        final_summary.to_csv(f'{_get_data_path(section_id, final_round.id)}/{section_id}_{final_round.id}_results.csv')
+        get_or_create_dir(DanceRounds._get_dir(section_id, final_round.id))
+        final_summary.to_csv(FinalSummaries._get_filepath(section_id, final_round.id))
         return final_summary
 
     def get(section_id):
         final_round = DanceRounds.get_final(section_id)
-        try:
-            # MEMO: FinalSummary.read_csv() is not yet implemented !!!
-            return pd.read_csv(f'{_get_data_path(section_id, final_round.id)}/{section_id}_{final_round.id}_results.csv', index_col=0)
-        except:
+        if not final_round:
             return
+        filepath = FinalSummaries._get_filepath(section_id, final_round.id)
+        if os.path.exists(filepath):
+            # MEMO: FinalSummary.read_csv() is not yet implemented !!!
+            return pd.read_csv(filepath, index_col=0)
 
 class Awards:
-    def _get_file_path(award_id):
-        return f'{_get_data_path()}/awards/{award_id}.csv'
+    def _get_dir():
+        return f'{_get_data_path()}/awards'
+
+    def _get_results_path(award_id):
+        return f'{Awards._get_dir()}/{award_id}.csv'
 
     def get(award_id):
-        for award in Conf.get().awards:
+        for award in Awards.get_all():
             if award.id == award_id:
                 return award
 
     def get_all():
+        # do not store awards separately but always read them from conf
         return Conf.get().awards
 
     def get_section_ids(award_id):
@@ -428,34 +460,37 @@ class Awards:
         return extract_section_ids(section_id_or_rules)
 
     def get_results(award_id):
-        try:
-            return pd.read_csv(Awards._get_file_path(award_id), sep=',', encoding='utf8', index_col=0)
-        except:
-            return
+        filepath = Awards._get_results_path(award_id)
+        if os.path.exists(filepath):
+            return pd.read_csv(filepath, sep=',', encoding='utf8', index_col=0)
 
     def create_results(award_id):
         section_id_or_rules = Conf.get().section_id_or_rules_per_award[award_id]
         place_dfs_per_section_id = {}
         for section_id in extract_section_ids(section_id_or_rules):
-            place_dfs_per_section_id[section_id] = Sections.get_results(Sections.get(section_id))
-        result_df = get_award_results(section_id_or_rules, place_dfs_per_section_id)
-        result_df.to_csv(Awards._get_file_path(award_id), sep=',', encoding='utf8')
-        return result_df
+            place_df = Sections.get_results(Sections.get(section_id))
+            if place_df is not None:
+                place_dfs_per_section_id[section_id] = place_df
+        if len(place_dfs_per_section_id) > 0:
+            result_df = get_award_results(section_id_or_rules, place_dfs_per_section_id)
+            if not result_df.empty:
+                get_or_create_dir(Awards._get_dir())
+                result_df.to_csv(Awards._get_results_path(award_id), sep=',', encoding='utf8')
+            return result_df.astype('Int64')
+        return pd.DataFrame()
 
 class HeatTables:
-    def _get_file_path(section_id, round_id):
-        return f'{_get_data_path(section_id, round_id)}/{section_id}_{round_id}_heats.csv'
+    def _get_filepath(section_id, round_id):
+        return f'{DanceRounds._get_dir(section_id, round_id)}/{section_id}_{round_id}_heats.csv'
 
     def get(section_id, round_id):
-        try:
-            return HeatTable.read_csv(HeatTables._get_file_path(section_id, round_id))
-        except:
-            return
+        filepath = HeatTables._get_filepath(section_id, round_id)
+        if os.path.exists(filepath):
+            return HeatTable.read_csv(filepath)
 
     def create(section_id, round_id):
         dance_round = DanceRounds.get(section_id, round_id)
         if not dance_round:
-            # invalid
             return
         heat_table = HeatTable(dance_round.competitors, [dance.id for dance in dance_round.dances])
         heat_table.randomize(dance_round.calc_heat_count(dance_round.max_heat_size))
@@ -488,7 +523,8 @@ class HeatTables:
         return merged_table.astype(object).fillna('-')
 
     def save(heat_table, section_id, round_id):
-        heat_table.to_csv(HeatTables._get_file_path(section_id, round_id))
+        get_or_create_dir(DanceRounds._get_dir(section_id, round_id))
+        heat_table.to_csv(HeatTables._get_filepath(section_id, round_id))
 
 class Heats:
     def from_table(heat_table, dance):
@@ -498,24 +534,25 @@ class Heats:
         return heats
 
 class OverallResults:
-    def _get_file_path():
+    def _get_filepath():
         return f'{_get_data_path()}/results.csv'
 
     def get():
-        try:
-            return pd.read_csv(OverallResults._get_file_path(), sep=',', encoding='utf8')
-        except:
-            return
+        filepath = OverallResults._get_filepath()
+        if os.path.exists(filepath):
+            return pd.read_csv(filepath, sep=',', encoding='utf8').astype('Int64').astype(object).fillna('-')
 
     def create():
         df = pd.DataFrame()
         for section in Sections.get_all():
             result_df = Sections.get_results(section)
-            result_df[section.id] = result_df['place']
-            df = df.join(result_df[section.id].to_frame(), how='outer')
+            if result_df is not None:
+                result_df[section.id] = result_df['place']
+                df = df.join(result_df[section.id].to_frame(), how='outer')
         for award in Awards.get_all():
             result_df = Awards.get_results(award.id)
-            result_df[award.id] = result_df['place']
-            df = df.join(result_df[award.id].to_frame(), how='outer')
-        df.to_csv(OverallResults._get_file_path(), sep=',', encoding='utf8')
-        return df
+            if result_df is not None:
+                result_df[award.id] = result_df['place']
+                df = df.join(result_df[award.id].to_frame(), how='outer')
+        df.to_csv(OverallResults._get_filepath(), sep=',', encoding='utf8')
+        return df.astype('Int64').astype(object).fillna('-')
