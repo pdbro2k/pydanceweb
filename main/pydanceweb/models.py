@@ -48,6 +48,7 @@ class Heat:
 class Conf:
     def __init__(self, name=''):
         self.name = name
+        self.max_heat_size = 8  # use maximum number of competitors in a final round per default
         self.dances = []
         self.sections = []
         self.section_groups = []
@@ -65,6 +66,7 @@ class Conf:
     def to_dict(self):
         conf_dict = {}
         conf_dict['name'] = self.name
+        conf_dict['max_heat_size'] = self.max_heat_size
         conf_dict['dances'] = {dance.to_dict() for dance in self.dances}
         conf_dict['sections'] = {section.id: section.name for section in self.sections}
         conf_dict['dances_per_section'] = {section.id: [dance.id for dance in section.dances] for section in self.sections}
@@ -83,6 +85,11 @@ class Conf:
     @staticmethod
     def from_dict(conf_dict):
         conf = Conf(conf_dict['name'])
+        if 'max_heat_size' in conf_dict:
+            if isinstance(conf_dict['max_heat_size'], int):
+                conf.max_heat_size = conf_dict['max_heat_size']
+            else:
+                print("ERR")
         conf.dances = Conf._get_dances(conf_dict)
 
         # get sections and add info from app/data

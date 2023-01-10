@@ -57,7 +57,8 @@ def handle_section(request, section_id):
 
 def _prepare_round(request, section_id, round_id):
     section = Sections.get(section_id)
-    max_heat_size = 8 # TODO: read from conf_dinct
+    conf = Conf.get()
+    max_heat_size = conf.max_heat_size
     if round_id == 1:
         # init new first round
         dance_round = DanceRounds.create_first(section_id)
@@ -73,7 +74,7 @@ def _prepare_round(request, section_id, round_id):
     if not dance_round:
         return HttpResponse('Runde nicht gefunden')
     context = {
-        'conf': Conf.get(),
+        'conf': conf,
         'section': section,
         'dance_round': dance_round,
         'heat_counts_per_size': dance_round.get_min_heat_counts_per_size(max_heat_size)
