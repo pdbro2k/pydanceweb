@@ -210,5 +210,4 @@ While the app is fully functional (especially for single dance sections), there 
 - make it possible to remove the last running round of a section
 - make it possible to redraw the heats from  the tournament desk heat view
 - make it possible to add competitors to running sections
-- add rule 10 and 11 to the tabulation of the final summary
 - make it possible to also use rule 10 for additional awards

@@ -1,3 +1,4 @@
+import math
 import pandas as pd
 import random
 
@@ -278,6 +279,8 @@ class SkatingTable(CallbackMarkTable):
         marks_per_competitor = {}
         for competitor in competitors:
             marks = list(relevant_df[competitor])
+            if set(marks) == {0}:
+                continue
             if max_mark > 0 and max_mark < len(self.get_competitors()):
                 marks = [x for x in marks if x <= max_mark and x > 0]
             marks_per_competitor[competitor] = marks
@@ -421,20 +424,31 @@ class FinalSummary(CallbackMarkTable):
         self._rule_11_df = pd.DataFrame()
         self._place_df = pd.DataFrame()
 
+    def analyze(self):
         self._apply_rule_9()
-        self._rule_10_df = self._build_rule_10_df()
-        self._rule_11_df = self._build_rule_11_df()
+        self._apply_rule_10()
+        self._apply_rule_11()
 
     def _apply_rule_9(self):
-        # build basic df with columns for the places from the individual dances
-        self._df = pd.DataFrame()
-        for i, skating_table in enumerate(self.skating_tables):
-            # fill place columns per dance
-            place_df = skating_table._place_df
-            place_df.columns = [f'{self._place_column}_{i+1}']
-            self._df = self._df.join(place_df, how='outer')
+        if self._df.empty:
+            # build basic df with columns for the places from the individual dances
+            self._df = pd.DataFrame()
+            for i, skating_table in enumerate(self.skating_tables):
+                # fill place columns per dance
+                place_df = skating_table._place_df.copy()
+                column = f'{self._place_column}_{i+1}'
+                place_df.columns = [column]
+
+                # calculate mean for tied competitors
+                for current_place, tied_competitors in FinalSummary._get_competitors_per_place(place_df[column]).items():
+                    if len(tied_competitors) > 1:
+                        mean_place = current_place + (len(tied_competitors) - 1) * .5
+                        for competitor in tied_competitors:
+                            place_df.at[competitor, column] = mean_place
+                self._df = self._df.join(place_df, how='outer')
 
         # add sum column
+        self._df[self._rule_9_calculation_column] = 0
         self._df[self._rule_9_calculation_column] = sum([self._df[x] for x in self._df.columns])
 
         # rule 9: set places by sorting the sums in descending order
@@ -450,18 +464,80 @@ class FinalSummary(CallbackMarkTable):
                 current_place = n
             self._place_df[self._place_column].loc[competitor] = current_place
 
-    def _build_rule_10_df(self):
-         # TODO add first tie breaker for multi-dance section results # MEMO: doesn't matter for the Fastnachtsturnier
-        df = pd.DataFrame()
-        return df
+    def _apply_rule_10(self):
+        df = pd.DataFrame(columns=[SkatingTable.build_calculation_column(x + 1) for x in range(len(self._df))])
+        for current_place in range(1, len(self._place_df) + 1):
+            tied_competitors = FinalSummary._get_competitors_per_place(self._place_df[self._place_column])[current_place]
+            if len(tied_competitors) > 1:
+                relevant_places_per_competitor = {}
+                for competitor in tied_competitors:
+                    relevant_places = [x for x in self._df.loc[competitor] if x > 0 and x <= current_place]
+                    relevant_places_per_competitor[competitor] = relevant_places
+                    df.at[competitor, SkatingTable.build_calculation_column(current_place)] = str(len(relevant_places))
 
-    def _build_rule_11_df(self):
-         # TODO add second tie breaker for multi-dance section results # MEMO: doesn't matter for the Fastnachtsturnier
+                competitors_per_place_count = SkatingTable.get_competitors_per_mark_count(relevant_places_per_competitor)
+                max_place_count = sorted(competitors_per_place_count)[-1]
+                if len(competitors_per_place_count[max_place_count]) == 1:
+                    best_competitor = competitors_per_place_count[max_place_count][0]
+                    for competitor in tied_competitors:
+                        if competitor != best_competitor:
+                            self._place_df.at[competitor, self._place_column] = current_place + 1
+                else:
+                    current_tied_competitors = competitors_per_place_count[max_place_count]
+                    current_relevant_places_per_competitor = {competitor: relevant_places_per_competitor[competitor] for competitor in current_tied_competitors}
+                    for competitor in current_relevant_places_per_competitor:
+                        df.at[competitor, SkatingTable.build_calculation_column(current_place)] = f'{len(current_relevant_places_per_competitor[competitor])} ({sum(current_relevant_places_per_competitor[competitor])})'
+
+                    competitors_per_place_sum = SkatingTable.get_competitors_per_mark_sum(current_relevant_places_per_competitor)
+                    min_place_sum = sorted(competitors_per_place_sum)[0]
+                    if len(competitors_per_place_sum[min_place_sum]) == 1:
+                        best_competitor = competitors_per_place_sum[min_place_sum][0]
+                        for competitor in tied_competitors:
+                            if competitor != best_competitor:
+                                self._place_df.at[competitor, self._place_column] = current_place + 1
+                    else:
+                        best_competitors = competitors_per_place_sum[min_place_sum]
+                        for competitor in tied_competitors:
+                            if competitor not in best_competitors:
+                                self._place_df.at[competitor, self._place_column] = current_place + len(best_competitors)
+                        # break tie with rule 11
+            if len(df) > 0:
+                self._rule_10_df = df.fillna('-')
+
+    def _apply_rule_11(self):
         df = pd.DataFrame()
-        return df
+        if len(self.skating_tables) == 0:
+            return
+
+        for current_place, tied_competitors in FinalSummary._get_competitors_per_place(self._place_df[self._place_column]).items():
+            if len(tied_competitors) > 1:
+                current_df = SkatingTable()
+                current_df._df = pd.DataFrame(index=self.get_competitors())
+                for i, skating_table in enumerate(self.skating_tables):
+                    current_df._df = current_df._df.join(skating_table._df.loc[tied_competitors].add_prefix(f'.{i+1}'), how='outer').fillna(0).astype(int)
+                current_df.analyze()
+                current_df._df = current_df._df.loc[tied_competitors]
+                for competitor in tied_competitors:
+                    place = current_df._place_df.at[competitor, self._place_column] + current_place - 1
+                    current_df._place_df.at[competitor, self._place_column] = place
+                    self._place_df.at[competitor, self._place_column] = place
+                df = df.join(current_df._calculation_df.loc[tied_competitors].T, how='outer')#.fillna('-')
+        self._rule_11_df = df.T.fillna('-')
+
+    def _get_competitors_per_place(place_column):
+        place_per_competitor = place_column.sort_values().to_dict()
+        competitors_per_place = {}
+        for competitor in place_per_competitor:
+            place = place_per_competitor[competitor]
+            if place in competitors_per_place:
+                competitors_per_place[place].append(competitor)
+            else:
+                competitors_per_place[place] = [competitor]
+        return competitors_per_place
+
 
     def to_frame(self):
-        df = self._df.join(self._rule_10_df, how='outer') # TODO: prefix columns to avoid conflicts !!!
-        df = df.join(self._rule_11_df, how='outer') # TODO: prefix columns to avoid conflicts !!!
-        df = df.join(self._place_df, how='outer')
-        return df.copy()
+        df = self._df.join(self._place_df, how='outer')
+        df = df.join(self._rule_10_df.add_prefix('R10_'), how='outer') # TODO: prefix columns to avoid conflicts !!!
+        df = df.join(self._rule_11_df.add_prefix('R11_'), how='outer') # TODO: prefix columns to avoid conflicts !!!
+        return df.fillna('-').copy()
