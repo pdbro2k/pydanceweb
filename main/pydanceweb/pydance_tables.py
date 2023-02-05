@@ -466,7 +466,7 @@ class FinalSummary(CallbackMarkTable):
 
     def _apply_rule_10(self):
         df = pd.DataFrame(columns=[SkatingTable.build_calculation_column(x + 1) for x in range(len(self._df))])
-        for current_place in range(1, len(self._place_df) + 1):
+        for current_place in sorted(set(self._place_df[self._place_column])):
             tied_competitors = FinalSummary._get_competitors_per_place(self._place_df[self._place_column])[current_place]
             if len(tied_competitors) > 1:
                 relevant_places_per_competitor = {}
