@@ -115,6 +115,10 @@ button, .button {
     cursor: pointer;
 }
 
+button.alert, .button.alert {
+  background-color: crimson;
+}
+
 button:hover, .button:hover {
     background-color: #FFF;
     color: rgb(157,0,0);

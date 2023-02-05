@@ -1,5 +1,11 @@
 {% extends 'pydanceweb/base_round.html' %}
 
+{% block links %}
+{% if dance_round.is_running %}
+{% include "pydanceweb/reset_round.html" %}
+{% endif %}
+{% endblock %}
+
 {% block form_controls %}
     {% if dance_round.is_finished %}
     {% elif dance_round.is_running %}

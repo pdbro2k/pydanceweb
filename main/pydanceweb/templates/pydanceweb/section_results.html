@@ -2,6 +2,9 @@
 
 {% block content %}
 <h2>{{ section.name }} - Ergebnisse</h2>
+{% if resetable %}
+{% include "pydanceweb/reset_round.html" %}
+{% endif %}
 <div class="row">
 {% if place_table %}
 <div class="row">

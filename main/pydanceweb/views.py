@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.http import HttpResponse
 from django.template import loader
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
 from .pydance_objects import *
 from .pydance_tables import *
@@ -82,6 +82,11 @@ def _prepare_round(request, section_id, round_id):
     return render(request, 'pydanceweb/dance_round_preparation.html', context)
 
 def handle_round(request, section_id, round_id):
+    if request.POST and 'reset' in request.POST and request.POST['reset'] == 'true':
+        DanceRounds.remove(DanceRounds.get(section_id, round_id))
+        if round_id > 1:
+            return redirect('handle_round', section_id = section_id, round_id = round_id - 1)
+
     dance_round = DanceRounds.get(section_id, round_id)
     if not dance_round:
         return _prepare_round(request, section_id, round_id)
@@ -155,10 +160,14 @@ def handle_heats(request, section_id, round_id, dance_id=""):
 # => finish current section
 def finalize_section(request, section_id):
     final_round = DanceRounds.get_final(section_id)
+    if request.POST and 'reset' in request.POST and request.POST['reset'] == 'true':
+        Sections.remove_results(Sections.get(section_id))
+        return redirect('handle_round', section_id = final_round.section_id, round_id = final_round.id)
+
     if final_round and not final_round.is_finished:
         # create final summary and finish final
         final_summary = FinalSummaries.create(section_id)
-        final_round = DanceRounds.get_final(section_id)
+        #final_round = DanceRounds.get_final(section_id)
         final_round.is_running = False
         final_round.is_finished = True
         DanceRounds.save(final_round)
@@ -171,7 +180,7 @@ def finalize_section(request, section_id):
 
         # create section results
         Sections.create_results(section)
-    return show_results(request, section_id)
+    return show_results(request, section_id, resetable=True)
 
 # => calc awards
 def handle_award(request, award_id):
@@ -301,13 +310,14 @@ def show_heats(request, section_id, round_id, dance_id=""):
     }
     return render(request, 'pydanceweb/heats.html', context)
 
-def show_results(request, section_id):
+def show_results(request, section_id, resetable=False):
     section = Sections.get(section_id)
     place_table = Sections.get_results(section)
 
     context = {
         'conf': Conf.get(),
         'section': section,
+        'resetable': resetable
     }
 
     if place_table is not None:

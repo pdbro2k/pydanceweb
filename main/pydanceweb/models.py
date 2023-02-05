@@ -6,6 +6,7 @@ from .award_calculator import *
 from glob import glob
 import json
 import os
+import shutil
 
 # generic helper functions
 def dump_json(json_dict, filepath):
@@ -238,6 +239,19 @@ class Sections:
         place_df['place'] = 1
         return place_df
 
+    def remove_results(section):
+        if not section:
+            return
+        filepath = Sections._get_results_path(section.id)
+        if os.path.exists(filepath):
+            print(filepath)
+            os.remove(filepath)
+            # set final running
+            final_round = DanceRounds.get_final(section.id)
+            final_round.is_finished = False
+            final_round.is_running = True
+            DanceRounds.save(final_round)
+
 class DanceRounds:
     def _get_dir(section_id, round_id):
         return _get_data_path(section_id, round_id)
@@ -313,6 +327,19 @@ class DanceRounds:
     def save(dance_round):
         get_or_create_dir(DanceRounds._get_dir(dance_round.section_id, dance_round.id))
         dump_json(dance_round.to_dict(), DanceRounds._get_filepath(dance_round.section_id, dance_round.id))
+
+    def remove(dance_round):
+        section_id = dance_round.section_id
+        round_id = dance_round.id
+        shutil.rmtree(DanceRounds._get_dir(section_id, round_id))
+        current_section = Sections.get(section_id)
+        current_section.is_running = False
+        Sections.save(current_section)
+        if round_id > 1:
+            previous_round = DanceRounds.get(section_id, round_id - 1)
+            previous_round.is_running = True
+            previous_round.is_finished = False
+            DanceRounds.save(previous_round)
 
 class CallbackMarks:
     def _get_filepath(adjudicator_id, section_id, round_id, dance_id=''):

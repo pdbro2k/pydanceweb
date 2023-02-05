@@ -84,7 +84,9 @@ From the heats view you can access the round view via the top left button (and f
 
 ![c.f. screenshots/desk_6_preliminary_round_view_2.png](screenshots/desk_6_preliminary_round_view_2.png)
 
-In this view you can access the adjudicator views to edit their callback marks (e.g. in case they have problems or in order to print adjudicator sheets) and press the reload button to update the current result table with callbacks marks from adjudicators. Having done so, you can move on to the next round by selecting the number of competitors that should be called back. Please note that this will lead to a final round if noted that way. (A final is every non first round with 6 or less competitors or up to 8 if the 7th and or 8th are tied with the 6th.)
+In this view you can remove all round data and go back to the last round (e.g. if you accidentally moved on to the next round early or chose an unwanted callback option).
+
+You can also access the adjudicator views to edit their callback marks (e.g. in case they have problems or in order to print adjudicator sheets) and press the reload button to update the current result table with callbacks marks from adjudicators. Having done so, you can move on to the next round by selecting the number of competitors that should be called back. Please note that this will lead to a final round if noted that way. (A final is every non first round with 6 or less competitors or up to 8 if the 7th and or 8th are tied with the 6th.)
 
 ### Handling Final Rounds and Finishing a Section
 
@@ -101,6 +103,8 @@ The view for a running final round and its analysis is also pretty similar to th
 If you click on the button to finalize the section you will get to the section results view:
 
 ![c.f. screenshots/desk_9_results.png](screenshots/desk_9_results.png)
+
+In this view you can get back to the final round view by clicking the reset button (which may once again be useful if you accidentally moved on to this view too early).
 
 All skating tables will be saved to  `data/sections/SECTION_ID/ROUND_NO/SECTION_ID_ROUND_NO_DANCE_NO_results.csv`, the final summary to `data/sections/SECTION_ID/ROUND_NO/SECTION_ID_ROUND_NO_results.csv` and a table with places for all competitors (merged from all rounds of the section) to `data/sections/SECTION_ID/results.csv`.
 
@@ -200,6 +204,10 @@ If there are any finished sections you will also find links to the detailed resu
 
 ![c.f. screenshots/_3_to_results.png](screenshots/_3_to_results.png)
 
+However, this view will lack a reset option:
+
+![c.f. screenshots/_4_results.png](screenshots/_4_results.png)
+
 
 ## TODOs
 
@@ -207,7 +215,6 @@ While the app is fully functional (especially for single dance sections), there 
 
 - make it possible to upload competitor/adjudicator participations in the tournament desk view
 - make it possible to print all adjudicator sheets for a given round at once
-- make it possible to remove the last running round of a section
 - make it possible to redraw the heats from  the tournament desk heat view
 - make it possible to add competitors to running sections
 - make it possible to also use rule 10 for additional awards
