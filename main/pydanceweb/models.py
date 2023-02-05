@@ -433,6 +433,7 @@ class FinalSummaries:
         for dance in final_round.dances:
             skating_tables.append(SkatingTables.get(section_id, final_round.id, dance.id))
         final_summary = FinalSummary(skating_tables)
+        final_summary.analyze()
         get_or_create_dir(DanceRounds._get_dir(section_id, final_round.id))
         final_summary.to_csv(FinalSummaries._get_filepath(section_id, final_round.id))
         return final_summary
