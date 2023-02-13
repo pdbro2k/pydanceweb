@@ -27,7 +27,7 @@
     {% elif not dance_rounds %}
     <a href="{% url 'handle_round' section.id next_round_id %}" class="button">erste Runde vorbereiten</a>
     {% elif last_round.is_finished and last_round.is_final %}
-    <a href="{% url 'show_results'  section.id %}" class="button">Ergebnisse ansehen</a>
+    <a href="{% url 'finalize_section'  section.id %}" class="button">Ergebnisse ansehen</a>
     {% elif last_round.is_finished %}
     <a href="{% url 'handle_round' section.id next_round_id %}" class="button">nächste Runde vorbereiten</a>
     {% elif last_round.is_running %}
