@@ -82,11 +82,15 @@ The heat table will be saved to `data/sections/SECTION_ID/ROUND_NO/SECTION_ID_RO
 
 From the heats view you can access the round view via the top left button (and from there you can get back vice versa):
 
-![c.f. screenshots/desk_6_preliminary_round_view_2.png](screenshots/desk_6_preliminary_round_view_2.png)
+![c.f. screenshots/desk_6_preliminary_round_view_2.png](screenshots/desk_6_preliminary_round_view.png)
 
 In this view you can remove all round data and go back to the last round (e.g. if you accidentally moved on to the next round early or chose an unwanted callback option).
 
-You can also access the adjudicator views to edit their callback marks (e.g. in case they have problems or in order to print adjudicator sheets) and press the reload button to update the current result table with callbacks marks from adjudicators. Having done so, you can move on to the next round by selecting the number of competitors that should be called back. Please note that this will lead to a final round if noted that way. (A final is every non first round with 6 or less competitors or up to 8 if the 7th and or 8th are tied with the 6th.)
+You can also access the adjudicator views to edit their callback marks (e.g. in case they have problems or in order to print adjudicator sheets) and press the reload button to update the current result table with callbacks marks from adjudicators.
+
+![c.f. screenshots/desk_6_preliminary_round_view_2.png](screenshots/desk_6_preliminary_round_view_2.png)
+
+Having done so, you can move on to the next round by selecting the number of competitors that should be called back. Please note that this will lead to a final round if noted that way. (A final is every non first round with 6 or less competitors or up to 8 if the 7th and or 8th are tied with the 6th.)
 
 ### Handling Final Rounds and Finishing a Section
 

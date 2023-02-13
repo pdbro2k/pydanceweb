@@ -35,7 +35,8 @@
     {% include "pydanceweb/callback_mark_table.html" with section=section callback_table=callback_table %}
   </div>
   {% if dance_round.is_running %}
-  <form class="columns" method="post" action="{% url 'handle_round' section.id dance_round.id|add:'1' %}">
+  <div id="missing_adjudicators_alert" class="error columns">Es fehlen noch die Wertungen von <span id="missing_adjudicators"></span>!</div>
+  <form id="to_next" class="columns" method="post" action="{% url 'handle_round' section.id dance_round.id|add:'1' %}">
     {% csrf_token %}
     <label for="callback_count">Wieviele Paare sollen weiterkommen?</label>
     <select id="callback_count" name="callback_count">
@@ -56,6 +57,8 @@
       <button>nächste Runde vorbereiten</button>
     </div>
   </form>
+  {% load static %}
+  <script type="text/javascript" src="{% static 'pydanceweb/show_alert_or_to_next.js' %}"></script>
   {% endif %}
 </div>
 {% endif %}

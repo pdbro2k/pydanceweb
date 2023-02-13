@@ -235,6 +235,14 @@ input[type=number] {
   border-left: .25rem solid green;
 }
 
+.error {
+  color: red;
+  background-color: #ffdddd;
+  margin: 1rem;
+  padding: .5rem;
+  border-left: .25rem solid red;
+}
+
 .fgrid {
 	display:grid;
 	grid-template-columns:auto auto;

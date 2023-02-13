@@ -29,12 +29,15 @@
     </div>
   </div>
   {% if dance_round.is_running %}
-  <form class="columns" method="post" action="{% url 'finalize_section' section.id %}">
+  <div id="missing_adjudicators_alert" class="error columns">Es fehlen noch die Wertungen von <span id="missing_adjudicators"></span>!</div>
+  <form id="to_next" class="columns" method="post" action="{% url 'finalize_section' section.id %}">
     {% csrf_token %}
     <div style="margin-left: 1rem;">
       <button>Turnier auswerten und beenden</button>
     </div>
   </form>
+  {% load static %}
+  <script type="text/javascript" src="{% static 'pydanceweb/show_alert_or_to_next.js' %}"></script>
   {% endif %}
 </div>
 {% endblock %}
