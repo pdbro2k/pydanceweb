@@ -246,6 +246,10 @@ class Sections:
         if os.path.exists(filepath):
             print(filepath)
             os.remove(filepath)
+            # reactivate section
+            section.is_running = True
+            section.is_finished = False
+            Sections.save(section)
             # set final running
             final_round = DanceRounds.get_final(section.id)
             final_round.is_finished = False
