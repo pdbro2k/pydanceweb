@@ -11,7 +11,7 @@
 
 {% block additional_round_info %}
 <dt>Kreuzvorgabe</dt>
-<dd>{{ dance_round.callback_wish }}</dd>
+<dd id="callback_wish">{{ dance_round.callback_wish }}</dd>
 {% endblock %}
 
 {% block form_controls %}
@@ -35,30 +35,50 @@
     {% include "pydanceweb/callback_mark_table.html" with section=section callback_table=callback_table %}
   </div>
   {% if dance_round.is_running %}
-  <div id="missing_adjudicators_alert" class="error columns">Es fehlen noch die Wertungen von <span id="missing_adjudicators"></span>!</div>
-  <form id="to_next" class="columns" method="post" action="{% url 'handle_round' section.id dance_round.id|add:'1' %}">
-    {% csrf_token %}
-    <label for="callback_count">Wieviele Paare sollen weiterkommen?</label>
-    <select id="callback_count" name="callback_count">
-      {% for callback_option in callback_options %}
-      <option value="{{ callback_option.competitors|length }}">
-        {% if forloop.last %}
-        alle
-        {% else %}
-        {{ callback_option.competitors|length }}
-        {% endif %}
-        {% if callback_option.is_final %}
-        (= Endrunde)
-        {% endif %}
-      </option>
-      {% endfor %}
-    </select>
-    <div style="margin-left: 1rem;">
-      <button>nächste Runde vorbereiten</button>
-    </div>
-  </form>
+  <div class="columns">
+    <div id="imprecise_adjudicators_alert" class="warning">Die Wertungen von <span id="imprecise_adjudicators"></span> entsprechen nicht der Vorgabe!</div>
+    <div id="missing_adjudicators_alert" class="error">Es fehlen noch die Wertungen von <span id="missing_adjudicators"></span>!</div>
+    <form id="to_next" class="columns" method="post" action="{% url 'handle_round' section.id dance_round.id|add:'1' %}">
+      {% csrf_token %}
+      <label for="callback_count">Wieviele Paare sollen weiterkommen?</label>
+      <select id="callback_count" name="callback_count">
+        {% for callback_option in callback_options %}
+        <option value="{{ callback_option.competitors|length }}">
+          {% if forloop.last %}
+          alle
+          {% else %}
+          {{ callback_option.competitors|length }}
+          {% endif %}
+          {% if callback_option.is_final %}
+          (= Endrunde)
+          {% endif %}
+        </option>
+        {% endfor %}
+      </select>
+      <div style="margin-left: 1rem;">
+        <button>nächste Runde vorbereiten</button>
+      </div>
+    </form>
+  </div>
   {% load static %}
   <script type="text/javascript" src="{% static 'pydanceweb/show_alert_or_to_next.js' %}"></script>
+  <script type="text/javascript">
+let callbackWish = parseInt(document.getElementById("callback_wish").innerHTML);
+
+let impreciseAdjudicators = [];
+Object.entries(sums).forEach(function([key, value]) {
+  if (value > 0 && value != callbackWish) {
+    impreciseAdjudicators.push(key);
+  }
+});
+
+
+if (impreciseAdjudicators.length > 0) {
+  document.getElementById("imprecise_adjudicators").innerHTML = impreciseAdjudicators;
+} else {
+  document.getElementById("imprecise_adjudicators_alert").style.display = "None";
+}
+  </script>
   {% endif %}
 </div>
 {% endif %}
