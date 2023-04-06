@@ -16,6 +16,63 @@ def render_frame(frame):
             return frame.sort_values(by='place').to_dict('index')
         return frame.to_dict('index')
 
+def show_competitor_overview(request):
+    conf = Conf.get()
+    table = CompetitorStartTables.get()
+    section_ids = table.to_frame().columns[6:] # TODO: improve !!!
+    unstarted_sections = Sections.get_running() + Sections.get_finished()
+    context = {
+        'conf': conf,
+        'competitor_table': render_frame(table.to_frame()),
+        'section_ids': section_ids,
+        'unstarted_sections': unstarted_sections
+    }
+    return render(request, 'pydanceweb/competitor_overview.html', context)
+
+def register_competitor(request, competitor=""):
+    if not competitor.isdigit():
+        return HttpResponse(f'Die Startnummer {competitor} ist ungültig!')
+
+    conf = Conf.get()
+    table = CompetitorStartTables.get()
+    uneditable_sections = Sections.get_uneditable()
+
+    if request.POST:
+        context = {
+            'conf': conf,
+            'competitor': competitor
+        }
+        #try:
+        if True:
+            lead = Person(competitor, request.POST['lead_name'], request.POST['lead_first_name'], request.POST['lead_team'])
+            follow = Person(competitor, request.POST['follow_name'], request.POST['follow_first_name'], request.POST['follow_team'])
+            registered_sections = []
+            for section in conf.sections:
+                if section not in uneditable_sections:
+                    if section.id in request.POST:
+                        registered_sections.append(section)
+            print([x.id for x in registered_sections])
+            CompetitorStartTables.set(table, competitor, registered_sections, lead, follow)
+        #except Exception as e:
+        #    print(e)
+        #    context['error'] = True
+
+        return render(request, 'pydanceweb/registration_reaction.html', context)
+
+    registered_sections = [Section(section_id) for section_id in table.get_participations(int(competitor))]
+    preregistered_sections = [Section(section_id) for section_id in table.get_preregistrations(int(competitor))]
+    context = {
+        'conf': conf,
+        'competitor_id': competitor,
+        'lead': CompetitorStartTables.get_lead(table, competitor),
+        'follow': CompetitorStartTables.get_follow(table, competitor),
+        'ungrouped_sections': conf.get_ungrouped_sections(),
+        'registered_sections': registered_sections,
+        'preregistered_sections': preregistered_sections,
+        'uneditable_sections': uneditable_sections
+    }
+    return render(request, 'pydanceweb/competitor_registration.html', context)
+
 # admin views
 def show_tournament_desk_index(request):
     conf = Conf.get()

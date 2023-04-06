@@ -1,0 +1,19 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>Wertungsrichter {{ adjudicator_id }}</h2>
+{% if error %}
+<div class="error">
+Die Änderungen konnten nicht gespeichert werden!
+</div>
+{% elif competitor %}
+<div class="success">
+Paar {{ competitor }} wurde erfolgreich registriert oder bearbeitet!
+</div>
+{% endif %}
+<div class="controls">
+  <a href="{% url 'show_competitor_overview' %}" class="button">zur Teilnehmerliste</a>
+</div>
+<script type="text/javascript">
+</script>
+{% endblock %}

@@ -162,6 +162,12 @@ label {
     vertical-align: top;
 }
 
+label.inline {
+  display: inline-block;
+  position: relative;
+  width: 40%;
+}
+
 select, input {
     margin: 1rem;
     /*width: 40%;*/
@@ -178,7 +184,7 @@ input[type="checkbox"] + label {
 input[type=checkbox] + label:before {
     content: '';
     background: #fff;
-    border: 0.2rem solid #ddd;
+    border: 0.2rem solid;
     border-radius: 25px;
     display: inline-block;
     vertical-align: middle;
@@ -189,6 +195,16 @@ input[type=checkbox] + label:before {
     text-align: center;
 }
 
+input[type=checkbox].pencil + label:before {
+    border-color: #ddd;
+}
+
+input:disabled,
+input:disabled + label,
+input:disabled + label:before {
+    color: grey;
+    border-color: grey;
+}
 input[type=checkbox].callback_mark:checked + label {
     font-weight: bold;
     color: #FFC71E;
@@ -197,9 +213,11 @@ input[type=checkbox].callback_mark:checked + label {
 
 input[type=checkbox]:checked + label:before {
     content: "✘";
-    color: #ddd;
 }
 
+input[type=checkbox].pencil:checked + label:before {
+    color: #ddd;
+}
 input[type=checkbox].callback_mark:checked + label:before {
     color: #FFC71E;
     border-color: #FFC71E;
@@ -268,6 +286,24 @@ li.additional::marker {
 
 .dance_section {
   display: inline-block;
+}
+
+.registered {
+  font-weight: bold;
+  color: green;
+}
+
+tr:hover .registered {
+  color: lightgreen;
+}
+
+.unregistered {
+  font-weight: bold;
+  color: magenta;
+}
+
+tr:hover .unregistered {
+  color: lightpink;
 }
 
 @media (min-width: 600px) {

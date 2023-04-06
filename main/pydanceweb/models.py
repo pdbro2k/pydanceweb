@@ -156,6 +156,60 @@ class CompetitorStartTables:
         if os.path.exists(filepath):
             return StartTable.read_csv(filepath)
 
+    def get_lead(competitor_start_table, competitor):
+        if competitor.isdigit():
+            competitor = int(competitor)
+            table = competitor_start_table.to_frame()
+            if competitor in table.index:
+                competitor_row = table.loc[competitor]
+                return Person(competitor, competitor_row['lead_surname'], competitor_row['lead_first_name'], competitor_row['lead_team'])
+        return Person(competitor)
+
+    def get_follow(competitor_start_table, competitor):
+        if competitor.isdigit():
+            competitor = int(competitor)
+            table = competitor_start_table.to_frame()
+            if competitor in table.index:
+                competitor_row = table.loc[competitor]
+                return Person(competitor, competitor_row['follow_surname'], competitor_row['follow_first_name'], competitor_row['follow_team'])
+        return Person(competitor)
+
+    def get_registered_sections(competitor_start_table, competitor):
+        if competitor.isdigit():
+            return  [Section(section_id) for section_id in competitor_start_table.get_participations(int(competitor))]
+        return []
+
+    def get_preregistered_sections(competitor_start_table, competitor):
+        if competitor.isdigit():
+            return  [Section(section_id) for section_id in competitor_start_table.get_preregistrations(int(competitor))]
+        return []
+
+    def set(competitor_start_table, competitor, registered_sections, lead=None, follow=None):
+        if competitor.isdigit():
+            competitor = int(competitor)
+            for section in Conf.get().sections:
+                if section not in Sections.get_uneditable():
+                    if section in registered_sections:
+                        competitor_start_table.add_participation(competitor, section.id)
+                    else:
+                        competitor_start_table.remove_participation(competitor, section.id)
+            # TODO: move to pydance_tables
+            if lead:
+                competitor_start_table._df.at[competitor, "lead_first_name"] = lead.first_name
+                competitor_start_table._df.at[competitor, "lead_surname"] = lead.name
+                competitor_start_table._df.at[competitor, "lead_team"] = lead.team
+            if follow:
+                competitor_start_table._df.at[competitor, "follow_first_name"] = follow.first_name
+                competitor_start_table._df.at[competitor, "follow_surname"] = follow.name
+                competitor_start_table._df.at[competitor, "follow_team"] = follow.team
+        CompetitorStartTables.save(competitor_start_table)
+
+    def save(competitor_start_table):
+        if not competitor_start_table:
+            return
+        competitor_start_table.to_csv(CompetitorStartTables._get_filepath())
+
+
 class AdjudicatorStartTables:
     def _get_filepath():
         return f'{_get_data_path()}/adjudicators.csv'
@@ -200,6 +254,14 @@ class Sections:
 
     def get_finished():
         return [section for section in Sections.get_all() if section.is_finished and len(section.dances) > 0]
+
+    def get_uneditable():
+        uneditable_sections = Sections.get_running() + Sections.get_finished()
+        for section in Conf.get().sections:
+            if section not in uneditable_sections:
+                if len(DanceRounds.get_all(section.id)) > 1:
+                    uneditable_sections.append(section)
+        return uneditable_sections
 
     def create(section_id):
         for section in Conf.get().sections:

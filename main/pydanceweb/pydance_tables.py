@@ -7,12 +7,31 @@ class StartTable:
     """A simple competitor Start Table"""
     def __init__(self, section_ids=[]):
         self._df = pd.DataFrame(index=[], columns=section_ids)
+        self.person_columns = [
+            'first_name', 'surname', 'team',
+            'lead_first_name', 'lead_surname', 'lead_team',
+            'follow_first_name', 'follow_surname', 'follow_team']
+
+    def _get_section_columns(self):
+        return [x for x in self._df.columns if x not in self.person_columns]
 
     def get_ids(self, section_id=""):
         if not section_id:
             return sorted(self._df.index)
         if section_id in self._df.columns:
             return sorted(self._df.loc[self._df[section_id] == 1].index)
+        return []
+
+    def get_preregistrations(self, competitor):
+        if competitor in self._df.index:
+            row = self._df.loc[competitor]
+            return list(row.loc[row == -1].index)
+        return []
+
+    def get_participations(self, competitor):
+        if competitor in self._df.index:
+            row = self._df.loc[competitor]
+            return list(row.loc[row == 1].index)
         return []
 
     def add_section(self, section_id):
@@ -27,9 +46,20 @@ class StartTable:
     def add_participation(self, competitor, section_id):
         assert section_id in self._df.columns, f"section '{section_id}' not found"
         self._df.at[competitor, section_id] = 1
-        table._df = table._df.fillna(0).astype(int)
+        self._df[self._get_section_columns()] = self._df[self._get_section_columns()].fillna(0).astype(int)
+        self._df = self._df.fillna("")
 
     def remove_participation(self, competitor, section_id):
+        assert section_id in self._df.columns, f"section '{section_id}' not found"
+        self._df.at[competitor, section_id] = 0
+
+    def add_preregistration(self, competitor, section_id):
+        assert section_id in self._df.columns, f"section '{section_id}' not found"
+        self._df.at[competitor, section_id] = -1
+        self._df[self._get_section_columns()] = self._df[self._get_section_columns()].fillna(0).astype(int)
+        self._df = self._df.fillna("")
+
+    def remove_preregistration(self, competitor, section_id):
         assert section_id in self._df.columns, f"section '{section_id}' not found"
         self._df.at[competitor, section_id] = 0
 

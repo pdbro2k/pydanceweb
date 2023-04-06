@@ -15,6 +15,19 @@ class PyDanceObject:
             "name": self.name
         }
 
+class Person(PyDanceObject):
+    def __init__(self, id, name='', first_name='', team=''):
+        super().__init__(id, name)
+        self.first_name = first_name
+        self.team = team
+
+    @staticmethod
+    def from_dict(data):
+        dance = Dance(data['id'])
+        if 'name' in data:
+            dance.name = data['name']
+        return dance
+
 class Dance(PyDanceObject):
     def __init__(self, id, name=''):
         super().__init__(id, name)

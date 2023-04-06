@@ -1,0 +1,74 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<h2>Registrierung Paar {{ competitor_id }}</h2>
+<form method="post">
+  {% csrf_token %}
+  <div class="row columns">
+      <fieldset class="four columns">
+        <h3>Herr</h3>
+          <label for="lead_first_name" class="inline">Vorname</label>
+          <input type="text" id="lead_first_name" name="lead_first_name" value="{{ lead.first_name }}" required/>
+          <label for="lead_name" class="inline">Nachname</label>
+          <input type="text" id="lead_name" name="lead_name" value="{{ lead.name }}" required/>
+          <label for="lead_first_name" class="inline">Team</label>
+          <input type="text" id="lead_team" name="lead_team" value="{{ lead.team }}"/>
+      </fieldset>
+      <fieldset class="four columns">
+          <h3>Dame</h3>
+          <label for="follow_first_name" class="inline">Vorname</label>
+          <input type="text" id="follow_first_name" name="follow_first_name" value="{{ follow.first_name }}" required/>
+          <label for="follow_name" class="inline">Nachname</label>
+          <input type="text" id="follow_name" name="follow_name" value="{{ follow.name }}" required/>
+          <label for="follow_first_name" class="inline">Team</label>
+          <input type="text" id="follow_team" name="follow_team" value="{{ follow.team }}"/>
+      </fieldset>
+  </div>
+  <div class="row">
+      {% for section_group in conf.section_groups %}
+      <fieldset class="dance_section_group page-break-after">
+          <h3>{{ section_group.name }}</h3>
+          {% for section in section_group.sections %}
+          {% if section in registered_sections or section in preregistered_sections %}
+            {% if section in uneditable_sections %}
+          <input type="checkbox" id="{{ section.id }}" checked disabled/>
+            {% else %}
+          <input type="checkbox" id="{{ section.id }}" name="{{ section.id }}" checked/>
+            {% endif %}
+          {% else %}
+            {% if section in uneditable_sections %}
+          <input type="checkbox" id="{{ section.id }}" disabled/>
+            {% else %}
+          <input type="checkbox" id="{{ section.id }}" name="{{ section.id }}"/>
+            {% endif %}
+          {% endif %}
+          <label for="{{ section.id }}">{{ section.name }}</label>
+          {% endfor %}
+      </fieldset>
+      {% endfor %}
+      <fieldset class="dance_section_group page-break-after">
+          <h3>Weitere</h3>
+          {% for section in ungrouped_sections %}
+          {% if section in registered_sections or section in preregistered_sections %}
+            {% if section in uneditable_sections %}
+          <input type="checkbox" id="{{ section.id }}" checked disabled/>
+            {% else %}
+          <input type="checkbox" id="{{ section.id }}" name="{{ section.id }}" checked/>
+            {% endif %}
+          {% else %}
+            {% if section in uneditable_sections %}<span>c</span>
+          <input type="checkbox" id="{{ section.id }}" disabled/>
+            {% else %}
+          <input type="checkbox" id="{{ section.id }}" name="{{ section.id }}"/>
+            {% endif %}
+          {% endif %}
+          <label for="{{ section.id }}">{{ section.name }}</label>
+          {% endfor %}
+      </fieldset>
+  </div>
+
+  <button>Registrierung abschließen oder ändern</button>
+</form>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+{% endblock %}
