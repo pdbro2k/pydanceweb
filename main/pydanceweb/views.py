@@ -201,8 +201,27 @@ def handle_heats(request, section_id, round_id, dance_id=""):
     if not heat_table:
         heat_table = HeatTables.create(section_id, round_id)
     if request.method == 'POST':
-        competitors = [int(x) for x in request.POST.getlist('competitors')]
-        HeatTables.move_to_last_heat(heat_table, section_id, round_id, dance_id, competitors)
+        if "DelayStart" in request.POST:
+            competitors = [int(x) for x in request.POST.getlist('competitors')]
+            HeatTables.move_to_last_heat(heat_table, section_id, round_id, dance_id, competitors)
+        elif "RemoveCompetitor" in request.POST:
+            competitors = [int(x) for x in request.POST.getlist('competitors')]
+            # Tranformation to update the section
+            section_dict = section.to_dict()
+            _tmp_competitors = section_dict['competitors']
+            #Remove Competitor from Heats
+            HeatTables.remove_competitor(heat_table,section_id,round_id,dance_id,competitors)
+            for competitor in competitors:
+                _tmp_competitors.remove(competitor)
+            section_dict['competitors'] = _tmp_competitors
+            section = Section.from_dict(section_dict)
+            Sections.save(section)
+            #Remove Competitor from DanceRound
+            dance_round_dict = dance_round.to_dict()
+            dance_round_dict['competitors'] = _tmp_competitors
+            dance_round = DanceRound.from_dict(dance_round_dict)
+            DanceRounds.save(dance_round)
+
     context = {
         'conf': Conf.get(),
         'section': section,

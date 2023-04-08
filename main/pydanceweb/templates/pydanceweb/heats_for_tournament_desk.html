@@ -28,7 +28,8 @@
 
     {% if heats|length > 1 %}
     <div class="controls">
-      <button type="submit">Auswahl in letztem Heat tanzen lassen</button>
+      <button type="submit" name="DelayStart" value="DelayStart">Auswahl in letztem Heat tanzen lassen</button>
+        <button type="submit" name="RemoveCompetitor" value="RemoveCompetitor">Auswahl aus dem Turnier entfernen</button>
     </div>
     {% endif %}
 </form>

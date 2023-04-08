@@ -301,6 +301,7 @@ class Sections:
         place_df['place'] = 1
         return place_df
 
+
     def remove_results(section):
         if not section:
             return
@@ -609,6 +610,12 @@ class HeatTables:
         for competitor in competitors:
             heat_table.change_heat(competitor, dance_id, heat_table.get_heat_count())
         HeatTables.save(heat_table, section_id, round_id)
+
+    def remove_competitor(heat_table,section_id,round_id,dance_id,competitors):
+        for competitor in competitors:
+            heat_table.remove_competitor(competitor,dance_id)
+        HeatTables.save(heat_table,section_id,round_id)
+
 
     def merge_running():
         # TODO: add section_ids as column group

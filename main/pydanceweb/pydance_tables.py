@@ -19,7 +19,7 @@ class StartTable:
         if not section_id:
             return sorted(self._df.index)
         if section_id in self._df.columns:
-            return sorted(self._df.loc[self._df[section_id] == 1].index)
+            return sorted(self._df.loc[self._df[section_id] != 0].index)
         return []
 
     def get_preregistrations(self, competitor):
@@ -31,7 +31,7 @@ class StartTable:
     def get_participations(self, competitor):
         if competitor in self._df.index:
             row = self._df.loc[competitor]
-            return list(row.loc[row == 1].index)
+            return list(row.loc[row != 0].index)
         return []
 
     def add_section(self, section_id):
@@ -147,6 +147,12 @@ class HeatTable:
         assert new_heat in range(1, self.get_heat_count() + 1), f"new_heat must be an integer between 1 and {self.get_heat_count()}"
 
         self._df.at[competitor, dance] = new_heat
+
+    def remove_competitor(self, competitor, dance):
+        assert competitor in self.get_competitors(), f"competitor {competitor} not found"
+        assert dance in self.get_dances(), f"dance '{dance}' not found"
+
+        self._df.drop(competitor,inplace=True)
 
     def to_frame(self):
         return self._df.copy()
