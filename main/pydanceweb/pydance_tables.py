@@ -72,6 +72,10 @@ class StartTable:
         self._df = self._df.sample(frac = 1).reset_index(drop=True) # shuffle
         self._reset_index(min_id)
 
+    def get_new_competitor_id(self):
+        # REturning a String representation of this for further usage (because isDigit() is used in the code)
+        return str(self._df.shape[0] + 1)
+
     def to_frame(self):
         return self._df.copy()
 

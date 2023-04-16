@@ -9,7 +9,10 @@ urlpatterns = [
     path('desk/', views.show_tournament_desk_index, name='show_tournament_desk_index'),
     path('desk/competitors', views.show_competitor_overview, name='show_competitor_overview'),
     path('desk/competitors/', views.show_competitor_overview, name='show_competitor_overview'),
+    path('desk/competitors/register/', views.register_new_competitor, name='register_new_competitor'),
+    path('desk/competitors/register', views.register_new_competitor, name='register_new_competitor'),
     path('desk/competitors/<competitor>', views.register_competitor, name='register_competitor'),
+
 
     # admin results/awards views
     path('desk/<section_id>/results', views.finalize_section, name='finalize_section'),

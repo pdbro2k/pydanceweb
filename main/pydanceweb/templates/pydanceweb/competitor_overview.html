@@ -1,7 +1,11 @@
 {% extends 'pydanceweb/base.html' %}
 
 {% block content %}
-<a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
+<div>
+  <a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
+  <a href="{% url 'register_new_competitor' %}" class="button">Turnierpaar registrieren</a>
+
+</div>
 
 <h2>Teilnehmerliste</h2>
 <div class="row">

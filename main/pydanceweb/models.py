@@ -184,6 +184,26 @@ class CompetitorStartTables:
             return  [Section(section_id) for section_id in competitor_start_table.get_preregistrations(int(competitor))]
         return []
 
+    def register_new_competitor(competitor_start_table, competitor, registered_sections, lead=None, follow=None):
+        if competitor.isdigit():
+            competitor = int(competitor)
+            for section in Conf.get().sections:
+                if section not in Sections.get_uneditable():
+                    if section in registered_sections:
+                        competitor_start_table.add_participation(competitor, section.id)
+                    else:
+                        competitor_start_table.remove_participation(competitor, section.id)
+            # TODO: move to pydance_tables
+            if lead:
+                competitor_start_table._df.loc[competitor, "lead_first_name"] = lead.first_name
+                competitor_start_table._df.loc[competitor, "lead_surname"] = lead.name
+                competitor_start_table._df.loc[competitor, "lead_team"] = lead.team
+            if follow:
+                competitor_start_table._df.loc[competitor, "follow_first_name"] = follow.first_name
+                competitor_start_table._df.loc[competitor, "follow_surname"] = follow.name
+                competitor_start_table._df.loc[competitor, "follow_team"] = follow.team
+        CompetitorStartTables.save(competitor_start_table)
+
     def set(competitor_start_table, competitor, registered_sections, lead=None, follow=None):
         if competitor.isdigit():
             competitor = int(competitor)
