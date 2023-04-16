@@ -51,7 +51,7 @@ def register_new_competitor(request):
                 if section not in uneditable_sections:
                     if section.id in request.POST:
                         registered_sections.append(section)
-            CompetitorStartTables.register_new_competitor(table, next_competitor_id, registered_sections, lead, follow)
+            CompetitorStartTables.set(table, next_competitor_id, registered_sections, lead, follow)
         return render(request, 'pydanceweb/registration_reaction.html', context)
     registered_sections = [Section(section_id) for section_id in table.get_participations(int(next_competitor_id))]
     preregistered_sections = [Section(section_id) for section_id in table.get_preregistrations(int(next_competitor_id))]
