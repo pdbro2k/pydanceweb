@@ -1,7 +1,7 @@
 {% extends 'pydanceweb/base.html' %}
 
 {% block content %}
-<h2>Registrierung Paar {{ competitor_id }}</h2>
+<h2>Registrierung {% if lead.name == "" and follow.name == "" %}neues{% endif %} Paar {{ competitor_id }}</h2>
 <form method="post">
   {% csrf_token %}
   <div class="row columns">
@@ -67,8 +67,6 @@
       </fieldset>
   </div>
 
-  <button>Registrierung abschließen oder ändern</button>
+  <button>Registrierung abschließen {% if lead.name != "" and follow.name != "" %}oder ändern{% endif %}</button>
 </form>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-
 {% endblock %}

@@ -31,42 +31,7 @@ def show_competitor_overview(request):
 
 
 def register_new_competitor(request):
-    conf = Conf.get()
-    next_competitor_id = CompetitorStartTables.get().get_new_competitor_id()
-    table = CompetitorStartTables.get()
-
-    uneditable_sections = Sections.get_uneditable()
-
-    if request.POST:
-        context = {
-            'conf': conf,
-            'competitor': next_competitor_id
-        }
-        #try:
-        if True:
-            lead = Person(next_competitor_id, request.POST['lead_name'], request.POST['lead_first_name'], request.POST['lead_team'])
-            follow = Person(next_competitor_id, request.POST['follow_name'], request.POST['follow_first_name'], request.POST['follow_team'])
-            registered_sections = []
-            for section in conf.sections:
-                if section not in uneditable_sections:
-                    if section.id in request.POST:
-                        registered_sections.append(section)
-            CompetitorStartTables.register_new_competitor(table, next_competitor_id, registered_sections, lead, follow)
-        return render(request, 'pydanceweb/registration_reaction.html', context)
-    registered_sections = [Section(section_id) for section_id in table.get_participations(int(next_competitor_id))]
-    preregistered_sections = [Section(section_id) for section_id in table.get_preregistrations(int(next_competitor_id))]
-    context = {
-        'conf': conf,
-        'competitor_id': next_competitor_id,
-        'lead': CompetitorStartTables.get_lead(table, next_competitor_id),
-        'follow': CompetitorStartTables.get_follow(table, next_competitor_id),
-        'ungrouped_sections': conf.get_ungrouped_sections(),
-        'registered_sections': registered_sections,
-        'preregistered_sections': preregistered_sections,
-        'uneditable_sections': uneditable_sections
-    }
-    return render(request, 'pydanceweb/competitor_new_registration.html', context)
-
+    return register_competitor(request, CompetitorStartTables.get().get_new_competitor_id())
 
 def register_competitor(request, competitor=""):
     if not competitor.isdigit():

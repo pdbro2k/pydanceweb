@@ -3,8 +3,6 @@
 {% block content %}
 <div>
   <a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
-  <a href="{% url 'register_new_competitor' %}" class="button">Turnierpaar registrieren</a>
-
 </div>
 
 <h2>Teilnehmerliste</h2>
@@ -43,6 +41,9 @@
     {% endfor %}
   </tbody>
 </table>
+</div>
+<div>
+    <a href="{% url 'register_new_competitor' %}" class="button">Teilnehmer hinzufügen</a>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
