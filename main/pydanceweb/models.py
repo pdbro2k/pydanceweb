@@ -94,9 +94,12 @@ class Conf:
         conf.dances = Conf._get_dances(conf_dict)
 
         # get sections and add info from app/data
-        competitor_start_table = CompetitorStartTables.get()
-        adjudicator_start_table = AdjudicatorStartTables.get()
         section_dict = conf_dict['sections']
+        competitor_start_table = CompetitorStartTables.get()
+        if not competitor_start_table:
+            competitor_start_table = StartTable(["lead_first_name","lead_surname","lead_team","follow_first_name","follow_surname","follow_team"] + [section_id for section_id in section_dict]) # TODO: improve!
+            CompetitorStartTables.save(competitor_start_table)
+        adjudicator_start_table = AdjudicatorStartTables.get()
         for section_id in section_dict:
             name = section_dict[section_id]
             dances_per_section = conf_dict['dances_per_section']

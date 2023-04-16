@@ -6,6 +6,7 @@
 </div>
 
 <h2>Teilnehmerliste</h2>
+{% if competitor_table %}
 <div class="row">
 <table>
   <thead>
@@ -42,9 +43,11 @@
   </tbody>
 </table>
 </div>
+{% endif %}
 <div>
     <a href="{% url 'register_new_competitor' %}" class="button">Teilnehmer hinzufügen</a>
 </div>
+{% if competitor_table %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">
@@ -52,4 +55,5 @@ $(function(){
   	$('table').tablesorter();
 });
 </script>
+{% endif %}
 {% endblock %}
