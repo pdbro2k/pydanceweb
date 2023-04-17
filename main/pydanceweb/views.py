@@ -33,6 +33,7 @@ def show_competitor_overview(request):
 def register_new_competitor(request):
     return register_competitor(request, CompetitorStartTables.get().get_new_competitor_id())
 
+
 def register_competitor(request, competitor=""):
     if not competitor.isdigit():
         return HttpResponse(f'Die Startnummer {competitor} ist ungültig!')
@@ -75,6 +76,20 @@ def register_competitor(request, competitor=""):
         'uneditable_sections': uneditable_sections
     }
     return render(request, 'pydanceweb/competitor_registration.html', context)
+
+def show_adjudicator_overview(request):
+    conf = Conf.get()
+    table = AdjudicatorStartTables.get()
+    table_length = table.to_frame().shape[0]
+    section_ids = table.to_frame().columns[0:]  # TODO: improve !!!
+    context = {
+        'conf': conf,
+        'adjudicator_table': render_frame(table.to_frame()),
+        'section_ids': section_ids,
+        'amount_adjudicators': table_length
+    }
+    return render(request, 'pydanceweb/adjudicator_overview.html',context)
+
 
 # admin views
 def show_tournament_desk_index(request):

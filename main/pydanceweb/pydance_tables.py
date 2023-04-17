@@ -115,6 +115,8 @@ class AdjudicatorStartTable(StartTable):
             table._reset_index()
         return table
 
+
+
 class HeatTable:
     """A simple Heat Table"""
     def __init__(self, competitors=[], dances=[]):

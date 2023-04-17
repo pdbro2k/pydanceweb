@@ -1,0 +1,82 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<div>
+  <a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
+</div>
+
+<h2>Wertungsrichter</h2>
+{% if adjudicator_table %}
+<div class="row">
+<table>
+  <thead>
+    <tr>
+      <th/>
+      {% for section_id in section_ids %}
+      <th>{{ section_id }}</th>
+      {% endfor %}
+      <th>QR-Code Wifi</th>
+      <th>QR-Code Wertungsrichter-Page</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for adjudicator_id, row in adjudicator_table.items %}
+    <tr>
+      <th>{{ adjudicator_id }}</th>
+      {% for section_id, cell_data in row.items %}
+      {% if cell_data == 0 %}
+      <td>-</td>
+      {% elif cell_data == 1 %}
+      <td title="für {{ section_id }} registriert" class="registered">&#10003;</td>
+      {% else %}
+      <td>{{ cell_data }}</td>
+      {% endif %}
+
+      {% endfor %}
+      <th class="qrcode-wifi"></th>
+      <th class="qrcode-judge" data-adjudicator-id="{{ adjudicator_id }}"></th>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% if adjudicator_table %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+
+<script type="text/javascript">
+  $(function(){
+      $('table').tablesorter();
+  });
+  function generateQRCode(element, url) {
+        const qrcodeGenerator = qrcode(0, 'L');
+        qrcodeGenerator.addData(url);
+        qrcodeGenerator.make();
+        element.innerHTML = qrcodeGenerator.createImgTag();
+    }
+
+    // Generate QR codes for all '.qrcode-wifi' elements when DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        const qrcodeWifiElements = document.querySelectorAll('.qrcode-wifi');
+        qrcodeWifiElements.forEach(element => {
+            const auth = 'Hardcode HERE';
+            const ssid = 'Hardcode HERE';
+            const password = 'HARDCODE here';
+            const wifiConfig = `WIFI:T:${auth};S:${ssid};P:${password};;`;
+            generateQRCode(element, wifiConfig);
+        });
+
+        // Generate QR codes for all '.qrcode-judge' elements
+        const qrcodeJudgeElements = document.querySelectorAll('.qrcode-judge');
+        qrcodeJudgeElements.forEach(element => {
+            const adjudicatorId = element.getAttribute('data-adjudicator-id');
+            const judgeUrl = `http://127.0.0.1:8000/ftm/judge_${adjudicatorId}/`;
+            generateQRCode(element, judgeUrl);
+        });
+    });
+</script>
+
+{% endif %}
+{% endblock %}
