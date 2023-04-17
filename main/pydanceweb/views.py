@@ -31,7 +31,6 @@ def show_competitor_overview(request):
 
 
 def register_new_competitor(request):
-    conf = Conf.get()
     return register_competitor(request, CompetitorStartTables.get().get_new_competitor_id())
 
 def register_competitor(request, competitor=""):
