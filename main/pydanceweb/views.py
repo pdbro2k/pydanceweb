@@ -31,7 +31,7 @@ def show_competitor_overview(request):
 
 
 def register_new_competitor(request):
-    return register_competitor(request, CompetitorStartTables.get().get_new_competitor_id())
+    return register_competitor(request, CompetitorStartTables.get().get_new_id())
 
 
 def register_competitor(request, competitor=""):
