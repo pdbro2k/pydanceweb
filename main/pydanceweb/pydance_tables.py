@@ -31,7 +31,7 @@ class StartTable:
     def get_participations(self, competitor):
         if competitor in self._df.index:
             row = self._df.loc[competitor]
-            return list(row.loc[row != 0].index)
+            return list(row.loc[row != 0].index) # evaluate if row == 1 is better
         return []
 
     def add_section(self, section_id):
@@ -47,7 +47,7 @@ class StartTable:
         assert section_id in self._df.columns, f"section '{section_id}' not found"
         self._df.at[competitor, section_id] = 1
         self._df[self._get_section_columns()] = self._df[self._get_section_columns()].fillna(0).astype(int)
-        self._df = self._df.fillna("")
+        self._df = self._df.fillna(0)
 
     def remove_participation(self, competitor, section_id):
         assert section_id in self._df.columns, f"section '{section_id}' not found"
@@ -86,7 +86,7 @@ class StartTable:
     def read_csv(path_or_buf, sep=',', encoding='utf8'):
         table = StartTable()
         table._df = pd.read_csv(path_or_buf, sep=sep, encoding=encoding)
-        table._df.fillna('',inplace=True)
+        table._df.fillna(0,inplace=True)
         if 'Unnamed: 0' in table._df.columns:
             table._df.set_index('Unnamed: 0', inplace=True)
             table._df.index.name = None
