@@ -12,6 +12,10 @@ body {
   overscroll-behavior: none;
 }
 
+.empty-cell {
+    background-color: red;
+}
+
 .list-group-item {
     height: 1.2rem;
     border: .1rem solid grey;

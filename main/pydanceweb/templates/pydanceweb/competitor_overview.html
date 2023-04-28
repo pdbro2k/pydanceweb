@@ -4,7 +4,11 @@
 <div>
   <a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
 </div>
-
+<style>
+  .empty-cell {
+    background-color: #FFCBCB;
+  }
+</style>
 <h2>Teilnehmerliste</h2>
 {% if competitor_table %}
 <div class="row">
@@ -28,6 +32,7 @@
     <tr>
       <th><a href="{% url 'register_competitor' competitor_id %}" title="Registrierung abschließen oder ändern">{{ competitor_id }}</a></th>
       {% for section_id, cell_data in row.items %}
+
       {% if cell_data == 0 %}
       <td>-</td>
       {% elif cell_data == 1 %}
@@ -35,7 +40,12 @@
       {% elif cell_data == -1 %}
       <td title="für {{ section_id }} angemeldet, aber noch nicht registriert" class="unregistered">?</td>
       {% else %}
-      <td>{{ cell_data }}</td>
+      {% if cell_data == '' %}
+       <td class="empty-cell"></td>
+      {% else %}
+        <td>{{ cell_data }}</td>
+      {% endif %}
+
       {% endif %}
       {% endfor %}
     </tr>

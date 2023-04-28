@@ -86,6 +86,7 @@ class StartTable:
     def read_csv(path_or_buf, sep=',', encoding='utf8'):
         table = StartTable()
         table._df = pd.read_csv(path_or_buf, sep=sep, encoding=encoding)
+        table._df.fillna('',inplace=True)
         if 'Unnamed: 0' in table._df.columns:
             table._df.set_index('Unnamed: 0', inplace=True)
             table._df.index.name = None
