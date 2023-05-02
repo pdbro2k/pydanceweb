@@ -4,6 +4,7 @@
 {% if dance_round.is_running %}
 {% include "pydanceweb/reset_round.html" %}
 {% endif %}
+<a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
 {% endblock %}
 
 {% block form_controls %}
