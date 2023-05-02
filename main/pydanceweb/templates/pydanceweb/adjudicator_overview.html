@@ -12,11 +12,13 @@
   <thead>
     <tr>
       <th/>
+      <th>Vorname</th>
+      <th>Nachname</th>
       {% for section_id in section_ids %}
       <th>{{ section_id }}</th>
       {% endfor %}
-      <th>QR-Code Wifi</th>
-      <th>QR-Code Wertungsrichter-Page</th>
+      <th>Wertungsrichterseite</th>
+      <th>QR-Code</th>
     </tr>
   </thead>
   <tbody>
@@ -33,8 +35,10 @@
       {% endif %}
 
       {% endfor %}
-      <th class="qrcode-wifi"></th>
-      <th class="qrcode-judge" data-adjudicator-id="{{ adjudicator_id }}"></th>
+      <th>
+        <a href="{{ base_url }}{% url 'show_current_adjudicator_rounds' adjudicator_id %}" target="_blank">{{ base_url }}{% url 'show_current_adjudicator_rounds' adjudicator_id %}</a>
+      </th>
+      <th class="qrcode-judge" data-url="{{ base_url }}{% url 'show_current_adjudicator_rounds' adjudicator_id %}"></th>
     </tr>
     {% endfor %}
   </tbody>
@@ -57,23 +61,12 @@
         element.innerHTML = qrcodeGenerator.createImgTag();
     }
 
-    // Generate QR codes for all '.qrcode-wifi' elements when DOM is fully loaded
+    // Generate QR codes for all '.qrcode-judge' elements when DOM is fully loaded
     document.addEventListener('DOMContentLoaded', function() {
-        const qrcodeWifiElements = document.querySelectorAll('.qrcode-wifi');
-        qrcodeWifiElements.forEach(element => {
-            const auth = 'Hardcode HERE';
-            const ssid = 'Hardcode HERE';
-            const password = 'HARDCODE here';
-            const wifiConfig = `WIFI:T:${auth};S:${ssid};P:${password};;`;
-            generateQRCode(element, wifiConfig);
-        });
-
-        // Generate QR codes for all '.qrcode-judge' elements
         const qrcodeJudgeElements = document.querySelectorAll('.qrcode-judge');
         qrcodeJudgeElements.forEach(element => {
-            const adjudicatorId = element.getAttribute('data-adjudicator-id');
-            const judgeUrl = `http://127.0.0.1:8000/ftm/judge_${adjudicatorId}/`;
-            generateQRCode(element, judgeUrl);
+            const url = element.getAttribute('data-url');
+            generateQRCode(element, url);
         });
     });
 </script>

@@ -80,13 +80,12 @@ def register_competitor(request, competitor=""):
 def show_adjudicator_overview(request):
     conf = Conf.get()
     table = AdjudicatorStartTables.get()
-    table_length = table.to_frame().shape[0]
     section_ids = table.get_sections()
     context = {
         'conf': conf,
         'adjudicator_table': render_frame(table.to_frame()),
         'section_ids': section_ids,
-        'amount_adjudicators': table_length
+        'base_url': request.build_absolute_uri('/')[:-1]
     }
     return render(request, 'pydanceweb/adjudicator_overview.html',context)
 

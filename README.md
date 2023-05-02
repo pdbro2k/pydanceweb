@@ -22,10 +22,6 @@ It contains the following key value pairs:
 - `"awards"`: an OPTIONAL dictionary in the form `"SOME_ID": "SOME_NAME"` of all additional awards that are calculated on the basis of section results
 - `"sections_per_award"`: an OPTIONAL dictionary in the form `"award_id": [SECTION_ID_OR_RULE, ...]` that defines how the respective award results should be calculated based on section results. Instead of a key from the `sections` dictionary you may also add a "rule" to the list of values. Such a rule must be in the form of a dictionary. There is currently only one rule in the form `"BEST": { "n": SOME_INT, "sections": ["SECTION_ID_1", ...]}` which is interpreted in the way that only the best `SOME_INT` results of the given sections are regarded while worse ones are ignored. Please note that this rule may not be nested! Please also note that competitors that did not compete in all specified sections (or a subset based on the rules) are excluded from the results. Finally, please note that only rule 9 of the skating system (i.e. the sum of the places) will be applied.
 
-## Adding Adjudicators
-
-Adjudicators can currently only be added by replacing the file `data/adjudicators.csv`. This file must be separated by `,` and must include a first column without a header that contains adjudicators ids that are usually upper case characters. The following columns must have a `SECTION_ID` specified in the conf as header and a cell with a `1` if the adjudicator judges the section or a `0` if not.
-
 ## Starting the Server
 
 Run `python main/manage.py runserver` to start a local server or `python main/manage.py runserver  0.0.0.0:8000` to start one that can be accessed over the web (the `ALLOWED_HOSTS` from `main/settings.py` are configured in a way that the current IP address is always allowed). 127.0.0.1 will be `YOUR_IP_ADDRESS` in the first case or your actual IP4 address in the latter.
@@ -38,15 +34,29 @@ Open http://`YOUR_IP_ADDRESS`/ftm/desk/ in a browser to access the tournament de
 
 Please note that the number of adjudicators will be red if it is invalid (i.e. 0 or an even number).
 
+## Managing Adjudicators
+
+You can get an overview over all adjudicators by clicking on the top button in the tournament desk view:
+
+![c.f. screenshots/desk_adjudicators_0_overview.png](screenshots/desk_adjudicators_0_overview.png)
+
+(Please note that there won't be a table if there are no competitors yet.)
+
+Here, you can see a table with name columns on the left and one column per section on the right. A green check mark signifies that an adjudicator is registered in a given section and a black minus that they are not. An explanation of each status icon is given on hover.
+
+Please note that you may sort any column by clicking on its header.
+
+All adjudicator data are saved to the file `data/adjudicators.csv`. This file must be separated by `,` and must include a first column without a header that contains adjudicator ids that are usually upper case characters. The following columns must have a `SECTION_ID` specified in the conf as header and a cell with a `1` if the adjudicator judges the section or a `0` if not.
+
 ### Managing Competitors
 
-You can get an overview over all competitors by clicking on the top bottom in the tournament desk view:
+You can get an overview over all competitors by clicking on the top button in the tournament desk view:
 
 ![c.f. screenshots/registration_0_overview.png](screenshots/registration_0_overview.png)
 
 (Please note that there won't be a table if there are no competitors yet.)
 
-Here, you can see a table with basic competitor information columns on the left and one column per section on the right. A green check mark signifies that a competitor is registered in a given section, a black minus that they are not and a magenta question mark that they are preregistered. (The distinction between registration and preregistration is important because competitors may have preregistered earlier to the tournament but do not appear due to illness etc.) An explanation of each status icon is given on hover.
+Here, you can see a table with basic competitor information columns on the left and one column per section on the right. A green check mark signifies that a competitor is registered in a given section, a light red background that they are not and a magenta question mark that they are preregistered. (The distinction between registration and preregistration is important because competitors may have preregistered earlier to the tournament but do not appear due to illness etc.) An explanation of each status icon is given on hover.
 
 Please note that you may sort any column by clicking on its header and that you can get to a view for changing registrations by clicking on the starting number:
 
