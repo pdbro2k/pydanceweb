@@ -19,7 +19,7 @@ def render_frame(frame):
 def show_competitor_overview(request):
     conf = Conf.get()
     table = CompetitorStartTables.get()
-    section_ids = table.to_frame().columns[6:] # TODO: improve !!!
+    section_ids = table.get_sections()
     unstarted_sections = Sections.get_running() + Sections.get_finished()
     context = {
         'conf': conf,
@@ -81,7 +81,7 @@ def show_adjudicator_overview(request):
     conf = Conf.get()
     table = AdjudicatorStartTables.get()
     table_length = table.to_frame().shape[0]
-    section_ids = table.to_frame().columns[0:]  # TODO: improve !!!
+    section_ids = table.get_sections()
     context = {
         'conf': conf,
         'adjudicator_table': render_frame(table.to_frame()),

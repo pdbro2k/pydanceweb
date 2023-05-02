@@ -15,6 +15,9 @@ class StartTable:
     def _get_section_columns(self):
         return [x for x in self._df.columns if x not in self.person_columns]
 
+    def get_sections(self):
+        return self._get_section_columns
+
     def get_ids(self, section_id=""):
         if not section_id:
             return sorted(self._df.index)
