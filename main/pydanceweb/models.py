@@ -52,6 +52,7 @@ class Conf:
         self.max_heat_size = 8  # use maximum number of competitors in a final round per default
         self.dances = []
         self.sections = []
+        self.registration_only_sections = []
         self.section_groups = []
         self.awards = []
         self.section_id_or_rules_per_award = []
@@ -72,6 +73,7 @@ class Conf:
         conf_dict['sections'] = {section.id: section.name for section in self.sections}
         conf_dict['dances_per_section'] = {section.id: [dance.id for dance in section.dances] for section in self.sections}
         conf_dict['additional_dances_per_section'] = {section.id: [dance.id for dance in section.additional_dances] for section in self.sections}
+        conf_dict['registration_only_sections'] = [section.id for section in self.registration_only_sections]
         conf_dict['section_groups'] = {section_group.id: section_group.name for section_group in self.section_groups}
         conf_dict['sections_per_group'] = {section_group.id: [section.id for section in section_group.sections] for section_group in self.section_groups}
         conf_dict['awards'] = {award.to_dict() for award in self.awards}
@@ -123,6 +125,12 @@ class Conf:
             if adjudicator_start_table:
                 section.adjudicators = adjudicator_start_table.get_ids(section.id)
             conf.sections.append(section)
+
+        # get registration only sections
+        conf.registration_only_sections = []
+        if 'registration_only_sections' in conf_dict:
+            for section_id in conf_dict['registration_only_sections']:
+                conf.registration_only_sections.append(Section(section_id))
 
         # get section groups
         section_group_dict = conf_dict['section_groups']

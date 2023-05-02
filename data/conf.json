@@ -42,6 +42,7 @@
         "DF": ["DF"],
         "NC": []
     },
+    "registration_only_sections": ["NC_beide"],
     "section_groups": {
         "STD": "Standardturniere",
         "LAT": "Lateinturniere"
