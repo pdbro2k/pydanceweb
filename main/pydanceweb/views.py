@@ -19,7 +19,7 @@ def render_frame(frame):
 def show_competitor_overview(request):
     conf = Conf.get()
     table = CompetitorStartTables.get()
-    section_ids = table.to_frame().columns[6:] # TODO: improve !!!
+    section_ids = table.get_sections()
     unstarted_sections = Sections.get_running() + Sections.get_finished()
     context = {
         'conf': conf,
@@ -28,6 +28,11 @@ def show_competitor_overview(request):
         'unstarted_sections': unstarted_sections
     }
     return render(request, 'pydanceweb/competitor_overview.html', context)
+
+
+def register_new_competitor(request):
+    return register_competitor(request, CompetitorStartTables.get().get_new_id())
+
 
 def register_competitor(request, competitor=""):
     if not competitor.isdigit():
@@ -51,7 +56,6 @@ def register_competitor(request, competitor=""):
                 if section not in uneditable_sections:
                     if section.id in request.POST:
                         registered_sections.append(section)
-            print([x.id for x in registered_sections])
             CompetitorStartTables.set(table, competitor, registered_sections, lead, follow)
         #except Exception as e:
         #    print(e)
@@ -72,6 +76,19 @@ def register_competitor(request, competitor=""):
         'uneditable_sections': uneditable_sections
     }
     return render(request, 'pydanceweb/competitor_registration.html', context)
+
+def show_adjudicator_overview(request):
+    conf = Conf.get()
+    table = AdjudicatorStartTables.get()
+    section_ids = table.get_sections()
+    context = {
+        'conf': conf,
+        'adjudicator_table': render_frame(table.to_frame()),
+        'section_ids': section_ids,
+        'base_url': request.build_absolute_uri('/')[:-1]
+    }
+    return render(request, 'pydanceweb/adjudicator_overview.html',context)
+
 
 # admin views
 def show_tournament_desk_index(request):
@@ -201,8 +218,27 @@ def handle_heats(request, section_id, round_id, dance_id=""):
     if not heat_table:
         heat_table = HeatTables.create(section_id, round_id)
     if request.method == 'POST':
-        competitors = [int(x) for x in request.POST.getlist('competitors')]
-        HeatTables.move_to_last_heat(heat_table, section_id, round_id, dance_id, competitors)
+        if "DelayStart" in request.POST:
+            competitors = [int(x) for x in request.POST.getlist('competitors')]
+            HeatTables.move_to_last_heat(heat_table, section_id, round_id, dance_id, competitors)
+        elif "RemoveCompetitor" in request.POST:
+            competitors = [int(x) for x in request.POST.getlist('competitors')]
+            # Tranformation to update the section
+            section_dict = section.to_dict()
+            _tmp_competitors = section_dict['competitors']
+            #Remove Competitor from Heats
+            HeatTables.remove_competitor(heat_table,section_id,round_id,dance_id,competitors)
+            for competitor in competitors:
+                _tmp_competitors.remove(competitor)
+            section_dict['competitors'] = _tmp_competitors
+            section = Section.from_dict(section_dict)
+            Sections.save(section)
+            #Remove Competitor from DanceRound
+            dance_round_dict = dance_round.to_dict()
+            dance_round_dict['competitors'] = _tmp_competitors
+            dance_round = DanceRound.from_dict(dance_round_dict)
+            DanceRounds.save(dance_round)
+
     context = {
         'conf': Conf.get(),
         'section': section,

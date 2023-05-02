@@ -1,9 +1,11 @@
 {% extends 'pydanceweb/base.html' %}
 
 {% block content %}
-<a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
-
+<div>
+  <a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
+</div>
 <h2>Teilnehmerliste</h2>
+{% if competitor_table %}
 <div class="row">
 <table>
   <thead>
@@ -25,8 +27,9 @@
     <tr>
       <th><a href="{% url 'register_competitor' competitor_id %}" title="Registrierung abschließen oder ändern">{{ competitor_id }}</a></th>
       {% for section_id, cell_data in row.items %}
-      {% if cell_data == 0 %}
-      <td>-</td>
+
+      {% if cell_data == 0 or cell_data == '' %}
+      <td class="empty-cell"></td>
       {% elif cell_data == 1 %}
       <td title="für {{ section_id }} registriert" class="registered">&#10003;</td>
       {% elif cell_data == -1 %}
@@ -40,6 +43,11 @@
   </tbody>
 </table>
 </div>
+{% endif %}
+<div>
+    <a href="{% url 'register_new_competitor' %}" class="button">Teilnehmer hinzufügen</a>
+</div>
+{% if competitor_table %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">
@@ -47,4 +55,5 @@ $(function(){
   	$('table').tablesorter();
 });
 </script>
+{% endif %}
 {% endblock %}

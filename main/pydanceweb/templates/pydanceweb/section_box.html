@@ -12,7 +12,14 @@
       <dt>Wertungsrichter</dt>
       <dd id="adjudicator_count_{{section.id}}">{{ section.adjudicators|length }}</dd>
       <dt>Teilnehmer</dt>
-      <dd id="competitor_count_{{section.id}}">{{ section.competitors|length }}</dd>
+      <dd id="competitor_count_{{section.id}}">
+        {% for dance_round in dance_rounds_per_section|get_item:section.id %}
+        {% if forloop.last %}
+        {{ dance_round.competitors|length }} /
+        {% endif %}
+        {% endfor %}
+        {{ section.competitors|length }}
+      </dd>
     </dl>
     {% load custom_tags %}
     {% if section.is_finished %}
@@ -40,7 +47,7 @@ if (Number(adjudicatorCount{{section.id}}.textContent) % 2 == 0) {
   adjudicatorCount{{section.id}}.classList.add("red");
 }
 var competitorCount{{section.id}} = document.getElementById('competitor_count_{{section.id}}');
-if (Number(competitorCount{{section.id}}.textContent) == 0) {
+if (Number(competitorCount{{section.id}}.textContent.split(' / ')[0]) == 0) {
   competitorCount{{section.id}}.classList.add("red");
 }
   </script>

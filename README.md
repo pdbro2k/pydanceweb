@@ -16,15 +16,12 @@ It contains the following key value pairs:
 - `"dances"`: a dictionary in the form `"SOME_ID": "SOME_NAME"` listing all dances that may appear in any section
 - `"sections"`: a dictionary in the form `"SOME_ID": "SOME_NAME"` of all sections (i.e. "subcompetitions")
 - `"dances_per_section"`: a dictionary in the form `"SECTION_ID": ["DANCE_ID_1", ...]` that expresses which dance is danced in which section. Please ensure that every ID is defined as a key in their respective dictionaries. Please note that you may also define a section without dances e.g. if you want to restrict award results to only certain competitors.
+- `"registration_only_sections"`: an OPTIONAL list in the form `["SECTION_ID_1", ...]` that declares which sections should only be used as additional fields for registration but should not be displayed in any other view
 - `"section_groups"`: a dictionary in the form `"SOME_ID": "SOME_NAME"` of all sections that should be grouped in the tournament desk view under the given name as header
 - `"sections_per_group"`: a dictionary in the form `"SECTION_GROUP_ID": ["SECTION_ID_1", ...]` that expresses which sections should be grouped under which header in the tournament desk view. Please ensure that every ID is defined as a key in their respective dictionaries.
 - `"max_heat_size"`: an OPTIONAL integer that specifies how many competitors are allowed to dance in the same heat (defaults to 8 - the maximum in a final round)
 - `"awards"`: an OPTIONAL dictionary in the form `"SOME_ID": "SOME_NAME"` of all additional awards that are calculated on the basis of section results
 - `"sections_per_award"`: an OPTIONAL dictionary in the form `"award_id": [SECTION_ID_OR_RULE, ...]` that defines how the respective award results should be calculated based on section results. Instead of a key from the `sections` dictionary you may also add a "rule" to the list of values. Such a rule must be in the form of a dictionary. There is currently only one rule in the form `"BEST": { "n": SOME_INT, "sections": ["SECTION_ID_1", ...]}` which is interpreted in the way that only the best `SOME_INT` results of the given sections are regarded while worse ones are ignored. Please note that this rule may not be nested! Please also note that competitors that did not compete in all specified sections (or a subset based on the rules) are excluded from the results. Finally, please note that only rule 9 of the skating system (i.e. the sum of the places) will be applied.
-
-## Adding Competitors and Adjudicators
-
-Competitors and adjudicators can currently only be added by replacing the files `data/competitors.csv` and `data/adjudicators.csv`. These files must be separated by `,` and must include a first column without a header that contains the starting numbers as integers (or adjudicators ids that are usually upper case characters). The following columns must have a `SECTION_ID` specified in the conf as header and a cell with a `1` if the competitor competes in the section (or the adjudicator judges it) or a `0` if not.
 
 ## Starting the Server
 
@@ -37,6 +34,38 @@ Open http://`YOUR_IP_ADDRESS`/ftm/desk/ in a browser to access the tournament de
 ![c.f. screenshots/desk_0_section_overview.png](screenshots/desk_0_section_overview.png)
 
 Please note that the number of adjudicators will be red if it is invalid (i.e. 0 or an even number).
+
+## Managing Adjudicators
+
+You can get an overview over all adjudicators by clicking on the top button in the tournament desk view:
+
+![c.f. screenshots/desk_adjudicators_0_overview.png](screenshots/desk_adjudicators_0_overview.png)
+
+(Please note that there won't be a table if there are no competitors yet.)
+
+Here, you can see a table with name columns on the left and one column per section on the right. A green check mark signifies that an adjudicator is registered in a given section and a black minus that they are not. An explanation of each status icon is given on hover.
+
+Please note that you may sort any column by clicking on its header.
+
+All adjudicator data are saved to the file `data/adjudicators.csv`. This file must be separated by `,` and must include a first column without a header that contains adjudicator ids that are usually upper case characters. The following columns must have a `SECTION_ID` specified in the conf as header and a cell with a `1` if the adjudicator judges the section or a `0` if not.
+
+### Managing Competitors
+
+You can get an overview over all competitors by clicking on the top button in the tournament desk view:
+
+![c.f. screenshots/registration_0_overview.png](screenshots/registration_0_overview.png)
+
+(Please note that there won't be a table if there are no competitors yet.)
+
+Here, you can see a table with basic competitor information columns on the left and one column per section on the right. A green check mark signifies that a competitor is registered in a given section, a light red background that they are not and a magenta question mark that they are preregistered. (The distinction between registration and preregistration is important because competitors may have preregistered earlier to the tournament but do not appear due to illness etc.) An explanation of each status icon is given on hover.
+
+Please note that you may sort any column by clicking on its header and that you can get to a view for changing registrations by clicking on the starting number:
+
+![c.f. screenshots/registration_0_overview.png](screenshots/registration_0_overview.
+
+After clicking the submit button you will be redirected to the following page from which you can access the registration overview.
+
+All registration data are saved to the file `data/competitors.csv`. In this, the columns with a valid `SECTION_ID` specified in the conf as header use `1` to mark a registration, `-1` for preregistrations and `0` for neither.
 
 ### Starting a Section
 
@@ -222,3 +251,5 @@ While the app is fully functional (especially for single dance sections), there 
 - make it possible to redraw the heats from  the tournament desk heat view
 - make it possible to add competitors to running sections
 - make it possible to also use rule 10 for additional awards
+- make it possible to have a general look round without letting the adjudicators give crosses to all competitors
+- make it possible to add a redance round

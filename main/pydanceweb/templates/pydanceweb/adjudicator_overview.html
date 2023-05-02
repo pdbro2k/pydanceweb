@@ -1,0 +1,75 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<div>
+  <a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
+</div>
+
+<h2>Wertungsrichter</h2>
+{% if adjudicator_table %}
+<div class="row">
+<table>
+  <thead>
+    <tr>
+      <th/>
+      <th>Vorname</th>
+      <th>Nachname</th>
+      {% for section_id in section_ids %}
+      <th>{{ section_id }}</th>
+      {% endfor %}
+      <th>Wertungsrichterseite</th>
+      <th>QR-Code</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for adjudicator_id, row in adjudicator_table.items %}
+    <tr>
+      <th>{{ adjudicator_id }}</th>
+      {% for section_id, cell_data in row.items %}
+      {% if cell_data == 0 %}
+      <td>-</td>
+      {% elif cell_data == 1 %}
+      <td title="für {{ section_id }} registriert" class="registered">&#10003;</td>
+      {% else %}
+      <td>{{ cell_data }}</td>
+      {% endif %}
+
+      {% endfor %}
+      <th>
+        <a href="{{ base_url }}{% url 'show_current_adjudicator_rounds' adjudicator_id %}" target="_blank">{{ base_url }}{% url 'show_current_adjudicator_rounds' adjudicator_id %}</a>
+      </th>
+      <th class="qrcode-judge" data-url="{{ base_url }}{% url 'show_current_adjudicator_rounds' adjudicator_id %}"></th>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% if adjudicator_table %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+
+<script type="text/javascript">
+  $(function(){
+      $('table').tablesorter();
+  });
+  function generateQRCode(element, url) {
+        const qrcodeGenerator = qrcode(0, 'L');
+        qrcodeGenerator.addData(url);
+        qrcodeGenerator.make();
+        element.innerHTML = qrcodeGenerator.createImgTag();
+    }
+
+    // Generate QR codes for all '.qrcode-judge' elements when DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        const qrcodeJudgeElements = document.querySelectorAll('.qrcode-judge');
+        qrcodeJudgeElements.forEach(element => {
+            const url = element.getAttribute('data-url');
+            generateQRCode(element, url);
+        });
+    });
+</script>
+
+{% endif %}
+{% endblock %}

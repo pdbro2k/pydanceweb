@@ -52,6 +52,7 @@ class Conf:
         self.max_heat_size = 8  # use maximum number of competitors in a final round per default
         self.dances = []
         self.sections = []
+        self.registration_only_sections = []
         self.section_groups = []
         self.awards = []
         self.section_id_or_rules_per_award = []
@@ -72,6 +73,7 @@ class Conf:
         conf_dict['sections'] = {section.id: section.name for section in self.sections}
         conf_dict['dances_per_section'] = {section.id: [dance.id for dance in section.dances] for section in self.sections}
         conf_dict['additional_dances_per_section'] = {section.id: [dance.id for dance in section.additional_dances] for section in self.sections}
+        conf_dict['registration_only_sections'] = [section.id for section in self.registration_only_sections]
         conf_dict['section_groups'] = {section_group.id: section_group.name for section_group in self.section_groups}
         conf_dict['sections_per_group'] = {section_group.id: [section.id for section in section_group.sections] for section_group in self.section_groups}
         conf_dict['awards'] = {award.to_dict() for award in self.awards}
@@ -94,9 +96,12 @@ class Conf:
         conf.dances = Conf._get_dances(conf_dict)
 
         # get sections and add info from app/data
-        competitor_start_table = CompetitorStartTables.get()
-        adjudicator_start_table = AdjudicatorStartTables.get()
         section_dict = conf_dict['sections']
+        competitor_start_table = CompetitorStartTables.get()
+        if not competitor_start_table:
+            competitor_start_table = StartTable(["lead_first_name","lead_surname","lead_team","follow_first_name","follow_surname","follow_team"] + [section_id for section_id in section_dict]) # TODO: improve!
+            CompetitorStartTables.save(competitor_start_table)
+        adjudicator_start_table = AdjudicatorStartTables.get()
         for section_id in section_dict:
             name = section_dict[section_id]
             dances_per_section = conf_dict['dances_per_section']
@@ -120,6 +125,12 @@ class Conf:
             if adjudicator_start_table:
                 section.adjudicators = adjudicator_start_table.get_ids(section.id)
             conf.sections.append(section)
+
+        # get registration only sections
+        conf.registration_only_sections = []
+        if 'registration_only_sections' in conf_dict:
+            for section_id in conf_dict['registration_only_sections']:
+                conf.registration_only_sections.append(Section(section_id))
 
         # get section groups
         section_group_dict = conf_dict['section_groups']
@@ -300,6 +311,7 @@ class Sections:
         place_df = pd.DataFrame(index=section.competitors)
         place_df['place'] = 1
         return place_df
+
 
     def remove_results(section):
         if not section:
@@ -609,6 +621,12 @@ class HeatTables:
         for competitor in competitors:
             heat_table.change_heat(competitor, dance_id, heat_table.get_heat_count())
         HeatTables.save(heat_table, section_id, round_id)
+
+    def remove_competitor(heat_table,section_id,round_id,dance_id,competitors):
+        for competitor in competitors:
+            heat_table.remove_competitor(competitor,dance_id)
+        HeatTables.save(heat_table,section_id,round_id)
+
 
     def merge_running():
         # TODO: add section_ids as column group

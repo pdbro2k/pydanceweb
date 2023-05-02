@@ -1,7 +1,7 @@
 {% extends 'pydanceweb/base.html' %}
 
 {% block content %}
-<h2>Wertungsrichter {{ adjudicator_id }}</h2>
+<h2>Registrierung {% if lead.name == "" and follow.name == "" %}neues{% endif %} Paar {{ competitor }}</h2>
 {% if error %}
 <div class="error">
 Die Änderungen konnten nicht gespeichert werden!

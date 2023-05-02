@@ -15,11 +15,14 @@ class StartTable:
     def _get_section_columns(self):
         return [x for x in self._df.columns if x not in self.person_columns]
 
+    def get_sections(self):
+        return self._get_section_columns
+
     def get_ids(self, section_id=""):
         if not section_id:
             return sorted(self._df.index)
         if section_id in self._df.columns:
-            return sorted(self._df.loc[self._df[section_id] == 1].index)
+            return sorted(self._df.loc[self._df[section_id] != 0].index)
         return []
 
     def get_preregistrations(self, competitor):
@@ -31,7 +34,7 @@ class StartTable:
     def get_participations(self, competitor):
         if competitor in self._df.index:
             row = self._df.loc[competitor]
-            return list(row.loc[row == 1].index)
+            return list(row.loc[row != 0].index) # evaluate if row == 1 is better
         return []
 
     def add_section(self, section_id):
@@ -47,7 +50,7 @@ class StartTable:
         assert section_id in self._df.columns, f"section '{section_id}' not found"
         self._df.at[competitor, section_id] = 1
         self._df[self._get_section_columns()] = self._df[self._get_section_columns()].fillna(0).astype(int)
-        self._df = self._df.fillna("")
+        self._df = self._df.fillna(0)
 
     def remove_participation(self, competitor, section_id):
         assert section_id in self._df.columns, f"section '{section_id}' not found"
@@ -72,6 +75,14 @@ class StartTable:
         self._df = self._df.sample(frac = 1).reset_index(drop=True) # shuffle
         self._reset_index(min_id)
 
+    def get_new_id(self):
+        ids = self.get_ids()
+        for i in range(len(ids)):
+            if i+1 not in ids:
+                return str(i+1)
+        # Returning a String representation of this for further usage (because isDigit() is used in the code)
+        return str(self._df.shape[0] + 1)
+
     def to_frame(self):
         return self._df.copy()
 
@@ -82,6 +93,7 @@ class StartTable:
     def read_csv(path_or_buf, sep=',', encoding='utf8'):
         table = StartTable()
         table._df = pd.read_csv(path_or_buf, sep=sep, encoding=encoding)
+        table._df.fillna(0,inplace=True)
         if 'Unnamed: 0' in table._df.columns:
             table._df.set_index('Unnamed: 0', inplace=True)
             table._df.index.name = None
@@ -100,6 +112,10 @@ class AdjudicatorStartTable(StartTable):
             adjudicator_ids.append(adjudicator_id)
         self._df.set_index([adjudicator_ids], inplace=True)
 
+    def get_new_id(self):
+        # get the next char
+        return chr(len(self._df) + ord('A'))
+
     @staticmethod
     def read_csv(path_or_buf, sep=',', encoding='utf8'):
         table = AdjudicatorStartTable()
@@ -110,6 +126,8 @@ class AdjudicatorStartTable(StartTable):
         else:
             table._reset_index()
         return table
+
+
 
 class HeatTable:
     """A simple Heat Table"""
@@ -147,6 +165,12 @@ class HeatTable:
         assert new_heat in range(1, self.get_heat_count() + 1), f"new_heat must be an integer between 1 and {self.get_heat_count()}"
 
         self._df.at[competitor, dance] = new_heat
+
+    def remove_competitor(self, competitor, dance):
+        assert competitor in self.get_competitors(), f"competitor {competitor} not found"
+        assert dance in self.get_dances(), f"dance '{dance}' not found"
+
+        self._df.drop(competitor,inplace=True)
 
     def to_frame(self):
         return self._df.copy()

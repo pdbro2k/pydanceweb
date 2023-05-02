@@ -25,7 +25,8 @@
         "PD": "Paso-Doble-Turnier",
         "JV": "Jiveturnier",
         "DF": "Discofoxturnier",
-        "Newcomer": "Newcomerwertung"
+        "NC": "Newcomerwertung",
+        "NC_beide": "beide Newcomer"
     },
     "dances_per_section": {
         "LW": ["LW"],
@@ -39,8 +40,9 @@
         "PD": ["PD"],
         "JV": ["JV"],
         "DF": ["DF"],
-        "Newcomer": []
+        "NC": []
     },
+    "registration_only_sections": ["NC_beide"],
     "section_groups": {
         "STD": "Standardturniere",
         "LAT": "Lateinturniere"
@@ -89,7 +91,7 @@
         ],
         "10TW": ["LW", "TG", "WW", "SF", "QS", "SB", "CC", "RB", "PD", "JV"],
         "NCW": [
-            "Newcomer",
+            "NC",
             {
                 "BEST": {
                     "n": 2,
