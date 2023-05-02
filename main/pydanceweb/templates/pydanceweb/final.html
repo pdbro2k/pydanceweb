@@ -3,6 +3,7 @@
 {% block content %}
 <h2>Endrunde ({{ dance_round.section_id }})</h2>
 <h3>Wertungsrichter {{ adjudicator_id }}</h3>
+<h4>{{ dance_round.competitors|length }} Teilnehmer</h4>
 <p>Bitte nur die Plätze 1-{{ dance_round.competitors|length }} vergeben und keine Platzierung doppelt.</p>
 <form method="post">
   {% csrf_token %}

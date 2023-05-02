@@ -3,6 +3,7 @@
 {% block content %}
 <h2>{{ dance_round.name }} ({{ dance_round.section_id }})</h2>
 <h3>Wertungsrichter {{ adjudicator_id }}</h3>
+<h4>{{ dance_round.competitors|length }} Teilnehmer</h4>
 <form method="post">
   {% csrf_token %}
   <p>Bitte insgesamt <b>{{ dance_round.callback_wish }} Kreuze</b> vergeben</p>
