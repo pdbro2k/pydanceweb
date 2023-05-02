@@ -251,3 +251,5 @@ While the app is fully functional (especially for single dance sections), there 
 - make it possible to redraw the heats from  the tournament desk heat view
 - make it possible to add competitors to running sections
 - make it possible to also use rule 10 for additional awards
+- make it possible to have a general look round without letting the adjudicators give crosses to all competitors
+- make it possible to add a redance round
