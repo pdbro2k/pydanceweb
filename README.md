@@ -4,7 +4,12 @@ This Django app can be used to run (and analyze) dancing competitions.
 
 ## Requirements
 
-- ensure that you have python installed (pydanceweb was developped and tested on version 3.9.1)
+- ensure that you have python installed (pydanceweb was developped and tested on version 3.12.2)
+- build a python environment (e.g. with venv): `python -m venv pydance_env`
+- activate the environment:
+    - Win (cmd.exe): `pydance_env\Scripts\activate.bat`
+    - Win (PowerShell): `pydance_env\Scripts\Activate.ps1`
+    - Mac/Linux: `source pydance_env/bin/activate`
 - run `pip install -r requirements.txt` in your python environment
 
 ## Adjusting the config

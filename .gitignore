@@ -3,3 +3,4 @@
 data/*/**
 data/results.csv
 main/pydanceweb/static/pydanceweb/resources
+pydance_env
