@@ -40,7 +40,7 @@ Open http://`YOUR_IP_ADDRESS`/ftm/desk/ in a browser to access the tournament de
 
 Please note that the number of adjudicators will be red if it is invalid (i.e. 0 or an even number).
 
-## Managing Adjudicators
+### Managing Adjudicators
 
 You can get an overview over all adjudicators by clicking on the top button in the tournament desk view:
 
@@ -220,6 +220,23 @@ Please also note that the styling used for printing looks once again differently
 
 The placements will be saved to `data/sections/SECTION_ID/ROUND_NO/SECTION_ID_ROUND_NO_DANCE_ID_final_marks_ADJUDICATOR_ID.json` in the form `COMPETITOR: PLACEMENT` and can be edited externally if necessary.
 
+## Using the Chair View
+
+### Current Rounds
+
+All rounds that are currently running will be listed on the chair index page (http://`YOUR_IP_ADDRESS`/ftm/chair/):
+
+![c.f. screenshots/chair_1_round_overview.png](screenshots/chair_1_round_overview.png)
+
+If you click one of the buttons you will get to a heat view where you can't judge or move competitors:
+
+![c.f. screenshots/_2_heat_overview.png](screenshots/_2_heat_overview.png)
+
+If you select a final round you will get a similar view:
+
+![c.f. screenshots/chair_3_final_round_view.png](screenshots/chair_3_final_round_view.png)
+
+
 ## Additional Views
 
 ### Current Rounds and Heats
@@ -235,6 +252,8 @@ Please note that this table will be styled differently if you use your browser's
 If you click one of the buttons at the left side of the page you will get to a heat view where you can't judge or move competitors:
 
 ![c.f. screenshots/_2_heat_overview.png](screenshots/_2_heat_overview.png)
+
+(Please note that final rounds will not be accessible from this view!)
 
 ### Results
 
@@ -253,7 +272,7 @@ While the app is fully functional (especially for single dance sections), there 
 
 - make it possible to upload competitor/adjudicator participations in the tournament desk view
 - make it possible to print all adjudicator sheets for a given round at once
-- make it possible to redraw the heats from  the tournament desk heat view
+- make it possible to redraw the heats from the tournament desk heat view
 - make it possible to add competitors to running sections
 - make it possible to also use rule 10 for additional awards
 - make it possible to have a general look round without letting the adjudicators give crosses to all competitors

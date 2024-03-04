@@ -1,0 +1,14 @@
+{% extends 'pydanceweb/base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="four columns round_links">
+    <h2>Laufende Runden</h2>
+    {% for dance_round in current_rounds %}
+    <div>
+      <a href="{% url 'show_heats_for_chair' dance_round.section_id dance_round.id %}" class="button">{{ dance_round.name }} ({{ dance_round.section_id }})</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

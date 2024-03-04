@@ -370,6 +370,17 @@ def judge_final(request, adjudicator_id, section_id, dance_id=''):
     }
     return render(request, 'pydanceweb/final.html', context)
 
+# chair views
+def show_index_for_chair(request):
+    context = {
+        'conf': Conf.get(),
+        'current_rounds': DanceRounds.get_running(),
+    }
+    return render(request, 'pydanceweb/index_for_chair.html', context)
+
+def show_heats_for_chair(request, section_id, round_id, dance_id=""):
+    return show_heats(request, section_id, round_id, dance_id, True)
+
 # "open" views
 def show_index(request):
     heat_table = HeatTables.merge_running()
@@ -383,13 +394,26 @@ def show_index(request):
     }
     return render(request, 'pydanceweb/index.html', context)
 
-def show_heats(request, section_id, round_id, dance_id=""):
+def show_heats(request, section_id, round_id, dance_id="", is_chair=False):
     section = Sections.get(section_id)
     dance_round = DanceRounds.get(section_id, round_id)
     if not dance_round:
         return HttpResponse('Runde nicht gefunden.')
     if not dance_id:
         dance_id = dance_round.dances[0].id
+
+    if dance_round.is_final:
+        if is_chair:
+            context = {
+                'conf': Conf.get(),
+                'section': section,
+                'dance_round': dance_round,
+                'dance_id': dance_id,
+                'first_dance_id': dance_round.dances[0].id,
+                'last_dance_id': dance_round.dances[-1].id
+            }
+            return render(request, 'pydanceweb/final_for_chair.html', context)
+        return HttpResponse('Runde nicht gefunden.')
 
     heat_table = HeatTables.get(section_id, round_id)
     context = {
@@ -400,6 +424,7 @@ def show_heats(request, section_id, round_id, dance_id=""):
         'first_dance_id': dance_round.dances[0].id,
         'last_dance_id': dance_round.dances[-1].id,
         'heats': Heats.from_table(heat_table, dance_id),
+        'is_chair': is_chair
     }
     return render(request, 'pydanceweb/heats.html', context)
 

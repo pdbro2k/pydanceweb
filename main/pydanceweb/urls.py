@@ -24,6 +24,9 @@ urlpatterns = [
     # adjudicator overview => current rounds
     path('judge_<adjudicator_id>', views.show_current_adjudicator_rounds, name='show_current_adjudicator_rounds'),
     path('judge_<adjudicator_id>/', views.show_current_adjudicator_rounds, name='show_current_adjudicator_rounds'),
+    # chair index
+    path('chair', views.show_index_for_chair, name='show_index_for_chair'),
+    path('chair/', views.show_index_for_chair, name='show_index_for_chair'),
     # open index => merged heat table and results
     path('', views.show_index, name='show_index'),
 
@@ -44,6 +47,12 @@ urlpatterns = [
     # adjudicator final view => set_final_marks
     path('judge_<adjudicator_id>/<section_id>/final', views.judge_final, name='judge_final'),
     path('judge_<adjudicator_id>/<section_id>/final/<dance_id>', views.judge_final, name='judge_final'),
+
+    # chair heats/final view 
+    path('chair/<section_id>/<int:round_id>', views.show_heats_for_chair, name='show_heats_for_chair'),
+    path('chair/<section_id>/<int:round_id>/', views.show_heats_for_chair, name='show_heats_for_chair'),
+    path('chair/<section_id>/<int:round_id>/<dance_id>', views.show_heats_for_chair, name='show_heats_chair'),
+    path('chair/<section_id>/<int:round_id>/<dance_id>/', views.show_heats_for_chair, name='show_heats_chair'),
 
     # open heats view
     path('<section_id>/<int:round_id>', views.show_heats, name='show_heats'),
