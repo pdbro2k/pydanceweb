@@ -418,6 +418,20 @@ class DanceRounds:
             previous_round.is_running = True
             previous_round.is_finished = False
             DanceRounds.save(previous_round)
+    
+    def get_preceding_dance_id(dance_round, dance_id=""):
+        if not dance_id:
+            dance_id = dance_round.dances[0].id
+        current_dance_round_index = dance_round.dances.index(Dance(dance_id))
+        if current_dance_round_index > 0:
+            return dance_round.dances[current_dance_round_index - 1].id
+        return dance_round.dances[0].id
+    
+    def get_following_dance_id(dance_round, dance_id=""):
+        current_dance_round_index = dance_round.dances.index(Dance(dance_id))
+        if current_dance_round_index < len(dance_round.dances) - 1:
+            return dance_round.dances[current_dance_round_index + 1].id
+        return dance_round.dances[-1].id
 
 class CallbackMarks:
     def _get_filepath(adjudicator_id, section_id, round_id, dance_id=''):

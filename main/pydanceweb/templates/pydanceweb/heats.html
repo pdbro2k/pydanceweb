@@ -19,10 +19,10 @@
     {% endfor %}
     <div class="controls">
       {% if dance_id != first_dance_id %}
-      <a href="{% url 'show_heats' section.id dance_round.id first_dance_id %}" class="button">zum vorherigen Tanz</a>
+      <a href="{% url 'show_heats' section.id dance_round.id preceding_dance_id %}" class="button">zum vorherigen Tanz</a>
       {% endif %}
       {% if dance_id != last_dance_id %}
-      <a href="{% url 'show_heats' section.id dance_round.id last_dance_id %}" class="button">zum nächsten Tanz</a>
+      <a href="{% url 'show_heats' section.id dance_round.id following_dance_id %}" class="button">zum nächsten Tanz</a>
       {% else %}
       {% if is_chair %}
       <a href="{% url 'show_index_for_chair' %}" class="button">zur Rundenübersicht</a>

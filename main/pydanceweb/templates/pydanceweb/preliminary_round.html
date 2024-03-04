@@ -65,10 +65,11 @@
   <script type="text/javascript" src="{% static 'pydanceweb/show_alert_or_to_next.js' %}"></script>
   <script type="text/javascript">
 let callbackWish = parseInt(document.getElementById("callback_wish").innerHTML);
+let danceCount = {{ dance_round.dances|length }};
 
 let impreciseAdjudicators = [];
 Object.entries(sums).forEach(function([key, value]) {
-  if (value > 0 && value != callbackWish) {
+  if (value > 0 && value != callbackWish * danceCount) {
     impreciseAdjudicators.push(key);
   }
 });

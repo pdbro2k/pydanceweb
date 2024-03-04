@@ -7,6 +7,14 @@
 </div>
 <form method="post">
   {% csrf_token %}
+  <div class="controls">
+    {% if dance_id != first_dance_id %}
+    <a href="{% url 'handle_heats' section.id dance_round.id preceding_dance_id %}" class="button">zum vorherigen Tanz</a>
+    {% endif %}
+    {% if dance_id != last_dance_id %}
+    <a href="{% url 'handle_heats' section.id dance_round.id following_dance_id %}" class="button">zum nächsten Tanz</a>
+    {% endif %}
+  </div>
   {% for heat in heats %}
   <fieldset class="heat">
       <h3>{{ dance_id }} - Heat {{ heat.no }}/{{ heats|length }}</h3>

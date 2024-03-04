@@ -28,6 +28,8 @@ It contains the following key value pairs:
 - `"awards"`: an OPTIONAL dictionary in the form `"SOME_ID": "SOME_NAME"` of all additional awards that are calculated on the basis of section results
 - `"sections_per_award"`: an OPTIONAL dictionary in the form `"award_id": [SECTION_ID_OR_RULE, ...]` that defines how the respective award results should be calculated based on section results. Instead of a key from the `sections` dictionary you may also add a "rule" to the list of values. Such a rule must be in the form of a dictionary. There is currently only one rule in the form `"BEST": { "n": SOME_INT, "sections": ["SECTION_ID_1", ...]}` which is interpreted in the way that only the best `SOME_INT` results of the given sections are regarded while worse ones are ignored. Please note that this rule may not be nested! Please also note that competitors that did not compete in all specified sections (or a subset based on the rules) are excluded from the results. Finally, please note that only rule 9 of the skating system (i.e. the sum of the places) will be applied.
 
+Please note that you can find an example of a more traditional config (with multi-dance sections) in `data_multidance-section-example`.
+
 ## Starting the Server
 
 Run `python main/manage.py runserver` to start a local server or `python main/manage.py runserver  0.0.0.0:8000` to start one that can be accessed over the web (the `ALLOWED_HOSTS` from `main/settings.py` are configured in a way that the current IP address is always allowed). 127.0.0.1 will be `YOUR_IP_ADDRESS` in the first case or your actual IP4 address in the latter.
@@ -39,6 +41,11 @@ Open http://`YOUR_IP_ADDRESS`/ftm/desk/ in a browser to access the tournament de
 ![c.f. screenshots/desk_0_section_overview.png](screenshots/desk_0_section_overview.png)
 
 Please note that the number of adjudicators will be red if it is invalid (i.e. 0 or an even number).
+
+If you overwrite the files in `data` with the ones from `data_multidance-section-example`, you will get the following:
+
+![c.f. screenshots/desk_0_section_overview_multidance_example.png](screenshots/desk_0_section_overview_multidance_example.png)
+
 
 ### Managing Adjudicators
 
@@ -112,6 +119,12 @@ Please also note that starting a round will again change its status in the tourn
 
 The heat table will be saved to `data/sections/SECTION_ID/ROUND_NO/SECTION_ID_ROUND_NO_heats.csv` and can be edited externally if necessary.
 
+#### Starting a Round of a Multi-Dance Sections
+
+In case of multi-dance sections the heats view will include buttons to move between the different dances:
+
+![c.f. screenshots/desk_5_heat_overview_multidance_example_2.png](screenshots/desk_5_heat_overview_multidance_example_2.png)
+
 ### Analyzing a Round
 
 From the heats view you can access the round view via the top left button (and from there you can get back vice versa):
@@ -132,9 +145,13 @@ The view for preparing a final round is similar to the one mentioned above with 
 
 ![c.f. screenshots/desk_7_start_final_round.png](screenshots/desk_7_start_final_round.png)
 
-The view for a running final round and its analysis is also pretty similar to the one used for preliminary rounds with the exception of including a skating table for each dance of the current round (and a final summary for multi dance sections):
+The view for a running final round and its analysis is also pretty similar to the one used for preliminary rounds with the exception of including a skating table for each dance of the current round:
 
 ![c.f. screenshots/desk_8_final_round_view_2.png](screenshots/desk_8_final_round_view_2.png)
+
+This view will also include a final summary in case of multi-dance sections:
+
+![c.f. screenshots/desk_8_final_round_view_2_multidance_example.png](screenshots/desk_8_final_round_view_2_multidance_example.png)
 
 (c.f. https://www.worlddancesport.org/Rule/Athlete/Competition/Judging-Systems if you're interested in how the skating system works)
 
@@ -206,15 +223,17 @@ After saving the callback marks you will be redirected to the following page fro
 
 ![c.f. screenshots/adjudicator_3_callback_marks_sent.png](screenshots/adjudicator_3_callback_marks_sent.png)
 
+![c.f. screenshots/adjudicator_3_callback_marks_sent_multidance_example.png](screenshots/adjudicator_3_callback_marks_sent_multidance_example.png)
+
 ### Judging Final Rounds
 
 Since there are no callback marks but placements in final rounds, the adjudicator view for final rounds looks a little different:
 
 ![c.f. screenshots/adjudicator_4_final_round_view_2.png](screenshots/adjudicator_4_final_round_view_2.png)
 
-Please note that the send button will be invisible if the placements are invalid.
+Please note that the send button will not be invisible if the placements are invalid.
 
-Please also note that the styling used for printing looks once again differently:
+Please also note that the styling used for printing once again looks differently:
 
 ![c.f. screenshots/adjudicator_4_final_round_view_print.png](screenshots/adjudicator_4_final_round_view_print.png)
 

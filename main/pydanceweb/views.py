@@ -187,8 +187,8 @@ def _handle_final_round(request, dance_round, section):
         'final_tables_per_dance': zip(dance_round.dances, final_tables),
     }
     if len(dance_round.dances) > 1:
-        final_summary = FinalSummaries.get(section.id)
-        context['final_summary'] = render_frame(final_summary)
+        final_summary = FinalSummaries.create(section.id)
+        context['final_summary'] = render_frame(final_summary.to_frame())
     return render(request, 'pydanceweb/final_round.html', context)
 
 def _handle_preliminary_round(request, dance_round, section):
@@ -246,6 +246,8 @@ def handle_heats(request, section_id, round_id, dance_id=""):
         'dance_id': dance_id,
         'first_dance_id': dance_round.dances[0].id,
         'last_dance_id': dance_round.dances[-1].id,
+        'preceding_dance_id': DanceRounds.get_preceding_dance_id(dance_round, dance_id),
+        'following_dance_id': DanceRounds.get_following_dance_id(dance_round, dance_id),
         'heats': Heats.from_table(heat_table, dance_id),
     }
     return render(request, 'pydanceweb/heats_for_tournament_desk.html', context)
@@ -409,6 +411,8 @@ def show_heats(request, section_id, round_id, dance_id="", is_chair=False):
                 'section': section,
                 'dance_round': dance_round,
                 'dance_id': dance_id,
+                'preceding_dance_id': DanceRounds.get_preceding_dance_id(dance_round, dance_id),
+                'following_dance_id': DanceRounds.get_following_dance_id(dance_round, dance_id),
                 'first_dance_id': dance_round.dances[0].id,
                 'last_dance_id': dance_round.dances[-1].id
             }
@@ -421,6 +425,8 @@ def show_heats(request, section_id, round_id, dance_id="", is_chair=False):
         'section': section,
         'dance_round': dance_round,
         'dance_id': dance_id,
+        'preceding_dance_id': DanceRounds.get_preceding_dance_id(dance_round, dance_id),
+        'following_dance_id': DanceRounds.get_following_dance_id(dance_round, dance_id),
         'first_dance_id': dance_round.dances[0].id,
         'last_dance_id': dance_round.dances[-1].id,
         'heats': Heats.from_table(heat_table, dance_id),

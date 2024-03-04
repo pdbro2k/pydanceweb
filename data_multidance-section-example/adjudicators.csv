@@ -1,0 +1,11 @@
+,first_name,surname,STD_AM,LAT_AM,STD_PRO,LAT_PRO,PK
+A,Frank,Taktkreuzer,1,0,1,0,1
+B,Daniel,Musterrichter,0,1,0,1,1
+C,Sven,Unbestechlich,1,1,1,1,0
+D,Stefanie,Fastnachtsrichter,1,1,1,1,0
+E,Lars,Unbestechlich,1,0,1,0,1
+F,Anja,Rechtsrichter,0,1,0,1,0
+G,Katrin,Taktrichter,0,1,0,1,0
+H,Susanne,Taktkreuzer,1,0,1,0,0
+I,Marco,Altbekannt,0,0,0,0,1
+J,Martin,Pendelrichter,0,0,0,0,1
