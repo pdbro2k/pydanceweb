@@ -2,11 +2,11 @@
 
 {% block links %}
 {% if dance_round.is_running %}
-{% include "pydanceweb/reset_round.html" %}
 <div class="row">
   <a href="{% url 'handle_heats' dance_round.section_id dance_round.id %}" class="button">zu den Heats</a>
   <a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
 </div>
+{% include "pydanceweb/reset_round.html" %}
 {% endif %}
 {% endblock %}
 
