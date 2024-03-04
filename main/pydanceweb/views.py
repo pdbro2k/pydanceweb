@@ -13,7 +13,7 @@ from .models import *
 def render_frame(frame):
     if frame is not None:
         if 'place' in frame.columns:
-            return frame.sort_values(by='place').to_dict('index')
+            return frame.reset_index().sort_values(by=['place', 'index']).set_index('index').to_dict('index')
         return frame.to_dict('index')
 
 def show_competitor_overview(request):
