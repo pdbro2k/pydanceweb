@@ -24,6 +24,7 @@ urlpatterns = [
     path('desk/results/', views.finalize, name='finalize'),
     path('desk/awards/<award_id>', views.handle_award, name='handle_award'),
     path('desk/awards/<award_id>/', views.handle_award, name='handle_award'),
+    path('desk/sheets', views.show_current_adjudicator_sheets, name='show_current_adjudicator_sheets'),
 
     # adjudicator overview => current rounds
     path('judge_<adjudicator_id>', views.show_current_adjudicator_rounds, name='show_current_adjudicator_rounds'),

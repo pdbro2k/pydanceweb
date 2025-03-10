@@ -282,6 +282,12 @@ If you click one of the buttons at the left side of the page you will get to a h
 
 (Please note that final rounds will not be accessible from this view!)
 
+### Current Adjudicator Sheets
+
+All sheets for rounds that are currently running will also be listed on the page http://`YOUR_IP_ADDRESS`/ftm/desk/scheets from where you can print them batch-wise. However, it is not possible to judge rounds with these versions. Please use the Adjudicator Views instead.
+
+(Please note that final rounds are accessible from this view!)
+
 ### Results
 
 If there are any finished sections you will also find links to the detailed results view below the current round overview:
@@ -298,7 +304,6 @@ However, this view will lack a reset option:
 While the app is fully functional (especially for single dance sections), there are still some additions that may be implemented in the future:
 
 - make it possible to upload competitor/adjudicator participations in the tournament desk view
-- make it possible to print all adjudicator sheets for a given round at once
 - make it possible to redraw the heats from the tournament desk heat view
 - make it possible to add competitors to running sections
 - make it possible to also use rule 10 for additional awards

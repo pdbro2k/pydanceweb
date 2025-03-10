@@ -314,6 +314,30 @@ def show_current_adjudicator_rounds(request, adjudicator_id):
     }
     return render(request, 'pydanceweb/index_for_adjudicator.html', context)
 
+def show_current_adjudicator_sheets(request):
+    current_rounds = []
+    adjudicators_per_section = { section.id: section.adjudicators for section in Sections.get_running() }
+    heat_dict = {}
+    for dance_round in DanceRounds.get_running():
+        section_id = dance_round.section_id
+        current_rounds.append(dance_round)
+
+        current_heat_dict = {}
+        for dance in dance_round.dances:
+            if dance_round.is_final:
+                continue
+            current_heat_dict[str(dance.id)] = Heats.from_table(HeatTables.get(section_id, dance_round.id), dance.id)
+        heat_dict[str(section_id)] = { 
+            str(dance_round.id): current_heat_dict
+        }
+    context = {
+        'conf': Conf.get(),
+        'current_rounds': current_rounds,
+        'adjudicators_per_section': adjudicators_per_section,
+        'heat_dict': heat_dict,
+    }
+    return render(request, 'pydanceweb/scoresheets_for_adjudicator.html', context)
+
 def _judge_next(request, adjudicator_id, dance_round, dance_id, callback_marks=[], final_marks={}):
     # goto next dance or index
     next_dance = None
