@@ -351,6 +351,9 @@ class DanceRounds:
         additional_dance_ids = [additional_dance.id for additional_dance in section.additional_dances]
         dance_round.dances = [dance for dance in section.dances if dance.id not in additional_dance_ids]
         dance_round.competitors = section.competitors
+        if len(dance_round.competitors) <= 6:
+            dance_round.is_final = True
+            dance_round.name = DanceRounds._build_name(dance_round.id, True)
         DanceRounds.save(dance_round)
         return dance_round
 

@@ -147,9 +147,11 @@ Having done so, you can move on to the next round by selecting the number of com
 
 ### Handling Final Rounds and Finishing a Section
 
-The view for preparing a final round is similar to the one mentioned above with the only difference that you don't have to specify a callback wish or heat size limit:
+The view for preparing a final round is similar to the one mentioned above with the only difference that you can't specify a callback wish or heat size limit:
 
 ![c.f. screenshots/desk_7_start_final_round.png](screenshots/desk_7_start_final_round.png)
+
+Please note that you may wish to postpone starting a final round especially if it's the first round and you want to call the competitors to the floor for a General Look that is not adjudicated.
 
 The view for a running final round and its analysis is also pretty similar to the one used for preliminary rounds with the exception of including a skating table for each dance of the current round:
 
@@ -300,5 +302,4 @@ While the app is fully functional (especially for single dance sections), there 
 - make it possible to redraw the heats from the tournament desk heat view
 - make it possible to add competitors to running sections
 - make it possible to also use rule 10 for additional awards
-- make it possible to have a general look round without letting the adjudicators give crosses to all competitors
 - make it possible to add a redance round
