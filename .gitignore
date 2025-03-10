@@ -2,5 +2,6 @@
 .idea
 data/*/**
 data/results.csv
+data/results_*.*
 main/pydanceweb/static/pydanceweb/resources
 pydance_env

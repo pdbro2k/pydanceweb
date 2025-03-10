@@ -2,7 +2,7 @@
 
 {% block content %}
 <div>
-  <a href="{% url 'show_tournament_desk_index' %}" class="button">zur Gesamtübersicht</a>
+  <a href="{% url 'show_tournament_desk_index' %}" class="button no-print">zur Gesamtübersicht</a>
 </div>
 <h2>Teilnehmerliste</h2>
 {% if competitor_table %}
@@ -45,7 +45,7 @@
 </div>
 {% endif %}
 <div>
-    <a href="{% url 'register_new_competitor' %}" class="button">Teilnehmer hinzufügen</a>
+    <a href="{% url 'register_new_competitor' %}" class="button no-print">Teilnehmer hinzufügen</a>
 </div>
 {% if competitor_table %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
