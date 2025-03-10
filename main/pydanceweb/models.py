@@ -642,16 +642,17 @@ class HeatTables:
 
 
     def merge_running():
-        # TODO: add section_ids as column group
+        # TODO: split by section groups
         current_rounds = [dance_round for dance_round in DanceRounds.get_running() if not dance_round.is_final]
         if len(current_rounds) < 1:
             return
-        merged_table = HeatTable().to_frame()
-        for dance_round in current_rounds:
+        for i, dance_round in enumerate(current_rounds):
             table = HeatTables.get(dance_round.section_id, dance_round.id).to_frame()
-            if len(dance_round.dances) > 1:
-                table.columns = [f'{dance_round.section_id}_{dance.id}' for dance in dance_round.dances]
-            merged_table = merged_table.join(table, how="outer")
+            table.columns = pd.MultiIndex.from_product([[dance_round.section_id], [dance.id for dance in dance_round.dances]])
+            if i == 0:
+                merged_table = table
+            else:
+                merged_table = merged_table.join(table, how="outer")
         return merged_table.astype(object).fillna('-')
 
     def save(heat_table, section_id, round_id):
