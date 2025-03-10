@@ -172,6 +172,8 @@ def handle_round(request, section_id, round_id):
 def _handle_final_round(request, dance_round, section):
     if not dance_round.is_running:
         if request.POST:
+            section.is_running = True
+            Sections.save(section)
             dance_round.is_running = True
             _add_additional_dances(dance_round, section, request.POST.getlist("add_dances"))
             DanceRounds.save(dance_round)
