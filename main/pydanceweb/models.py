@@ -688,4 +688,18 @@ class OverallResults:
                 result_df[award.id] = result_df['place']
                 df = df.join(result_df[award.id].to_frame(), how='outer')
         df.to_csv(OverallResults._get_filepath(), sep=',', encoding='utf8')
+
+        # create/update additional result files
+        conf_dict = read_json(f'{_get_data_path()}/conf.json')
+        if "result_files" in conf_dict:
+            competitor_df = CompetitorStartTables.get().to_frame()
+            for key, col_dict in conf_dict["result_files"].items():
+                competitor_cols = col_dict["competitors"]
+                result_cols = col_dict["results"]
+                try:
+                    current_df = competitor_df[competitor_cols].join(df[result_cols].dropna(how='all').astype('Int64'), how='right', lsuffix='_participation')
+                    current_df.to_csv(f'{_get_data_path()}/results_{key}.csv', sep=',', encoding='utf8')
+                except:
+                    pass
+        
         return df.astype('Int64').astype(object).fillna('-')

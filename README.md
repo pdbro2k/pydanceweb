@@ -21,13 +21,14 @@ It contains the following key value pairs:
 - `"dances"`: a dictionary in the form `"SOME_ID": "SOME_NAME"` listing all dances that may appear in any section
 - `"sections"`: a dictionary in the form `"SOME_ID": "SOME_NAME"` of all sections (i.e. "subcompetitions")
 - `"dances_per_section"`: a dictionary in the form `"SECTION_ID": ["DANCE_ID_1", ...]` that expresses which dance is danced in which section. Please ensure that every ID is defined as a key in their respective dictionaries. Please note that you may also define a section without dances e.g. if you want to restrict award results to only certain competitors.
-- `"additional_dances_per_section"`: a dictionary in the form `"SECTION_ID": ["DANCE_ID_1", ...]` that expresses which dance(s) shall not be danced in the first round but may be added later in which section. Please ensure that every ID is defined as a key in their respective dictionaries and is mapped to the respective section via `"dances_per_section"`. Please note that this dictionary is completely optional and you also do not need to add empty lists for sections without additional dances.
+- `"additional_dances_per_section"`: an OPTIONAL dictionary in the form `"SECTION_ID": ["DANCE_ID_1", ...]` that expresses which dance(s) shall not be danced in the first round but may be added later in which section. Please ensure that every ID is defined as a key in their respective dictionaries and is mapped to the respective section via `"dances_per_section"`. Please note that you do not need to add empty lists for sections without additional dances.
 - `"registration_only_sections"`: an OPTIONAL list in the form `["SECTION_ID_1", ...]` that declares which sections should only be used as additional fields for registration but should not be displayed in any other view
 - `"section_groups"`: a dictionary in the form `"SOME_ID": "SOME_NAME"` of all sections that should be grouped in the tournament desk view under the given name as header
 - `"sections_per_group"`: a dictionary in the form `"SECTION_GROUP_ID": ["SECTION_ID_1", ...]` that expresses which sections should be grouped under which header in the tournament desk view. Please ensure that every ID is defined as a key in their respective dictionaries.
 - `"max_heat_size"`: an OPTIONAL integer that specifies how many competitors are allowed to dance in the same heat (defaults to 8 - the maximum in a final round)
 - `"awards"`: an OPTIONAL dictionary in the form `"SOME_ID": "SOME_NAME"` of all additional awards that are calculated on the basis of section results
 - `"sections_per_award"`: an OPTIONAL dictionary in the form `"award_id": [SECTION_ID_OR_RULE, ...]` that defines how the respective award results should be calculated based on section results. Instead of a key from the `sections` dictionary you may also add a "rule" to the list of values. Such a rule must be in the form of a dictionary. There is currently only one rule in the form `"BEST": { "n": SOME_INT, "sections": ["SECTION_ID_1", ...]}` which is interpreted in the way that only the best `SOME_INT` results of the given sections are regarded while worse ones are ignored. Please note that this rule may not be nested! Please also note that competitors that did not compete in all specified sections (or a subset based on the rules) are excluded from the results. Finally, please note that only rule 9 of the skating system (i.e. the sum of the places) will be applied.
+- `"result_files"`: an OPTIONAL dictionary in the form `"result_id": "competitors": ["COMPETITOR_COL_1", ...], "results": ["SECTION_OR_AWARD_ID_1", ...]` that defines which columns of the competitor table and the overall result table should be merged into a new one that is stored to a file named `results_RESULT_ID.csv` when generating the result overview. Please note that participation columns will be suffixed with `"_participation"` if selected as `"COMPETITOR_COL_N"`.
 
 Please note that you can find an example of a more traditional config (with multi-dance sections) in `data_multidance-section-example`.
 
@@ -196,7 +197,7 @@ It may look like this:
 
 ![c.f. screenshots/desk_15_results.png](screenshots/desk_15_results.png)
 
-This table will be saved to `data/results.csv` and will be updated every time you click on the button.
+This table will be saved to `data/results.csv` and will be updated every time you click on the button. The same is true to all additional result files generated based on the `result_files` dictionary in the config if there is one.
 
 ## Using the Adjudicator View
 

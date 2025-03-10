@@ -105,5 +105,22 @@
                 }
             }
         ]
+    }, "result_files": {
+        "STD-LAT": {
+            "competitors": ["lead_first_name", "lead_surname", "lead_team", "follow_first_name", "follow_surname", "follow_team"],
+            "results": ["LW", "TG", "WW", "SF", "QS", "STDW", "SB", "CC", "RB", "PD", "JV", "LATW", "GESW"]
+        },
+        "10TW": {
+            "competitors": ["lead_first_name", "lead_surname", "lead_team", "follow_first_name", "follow_surname", "follow_team"],
+            "results": ["10TW"]
+        },
+        "NC": {
+            "competitors": ["lead_first_name", "lead_surname", "lead_team", "follow_first_name", "follow_surname", "follow_team", "NC", "NC_beide"],
+            "results": ["NC"]
+        },
+        "DF": {
+            "competitors": ["lead_first_name", "lead_surname", "lead_team", "follow_first_name", "follow_surname", "follow_team"],
+            "results": ["DF"]
+        }
     }
 }
