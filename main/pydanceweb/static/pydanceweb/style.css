@@ -342,6 +342,10 @@ tr:hover .unregistered {
   display: block;
 }
 
+.print-only {
+  display: none;
+}
+
 @media print {
   .page-break-before {
     page-break-before: always;
@@ -349,9 +353,16 @@ tr:hover .unregistered {
   .page-break-after {
     page-break-after: always;
   }
+  .avoid-page-break-inside {
+    break-inside: avoid;
+  }
 
   .no-print {
     display: none;
+  }
+
+  .print-only {
+    display: initial;
   }
 
   .controls * {

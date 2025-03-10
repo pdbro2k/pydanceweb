@@ -94,7 +94,7 @@ class SectionGroup(PyDanceObject):
         if 'name' in data:
             section_group.name = data['name']
         if 'sections' in data:
-            section.sections = [Section.from_dict(section) for section in data['sections']]
+            section_group.sections = [Section.from_dict(section) for section in data['sections']]
         return section_group
 
 class DanceRound(PyDanceObject):

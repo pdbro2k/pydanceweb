@@ -421,14 +421,46 @@ def show_heats_for_chair(request, section_id, round_id, dance_id=""):
 
 # "open" views
 def show_index(request):
-    heat_table = HeatTables.merge_running()
-    if heat_table is not None:
-        heat_table = heat_table.to_html()
+    conf = Conf.get()
+    current_rounds = DanceRounds.get_running()
+    all_section_groups = conf.section_groups
+    ungrouped_sections = conf.get_ungrouped_sections()
+    section_groups = []
+    current_rounds_per_group = {}
+    for dance_round in current_rounds:
+        section = Sections.get(dance_round.section_id)
+        if section in ungrouped_sections:
+            section_group = SectionGroup("Weitere", "Weitere", [section])
+            if section_group in section_groups:
+                current_rounds_per_group[str(section_group.id)].append(dance_round)
+            else:
+                section_groups.append(section_group)
+                current_rounds_per_group[str(section_group.id)] = [dance_round]
+            if section_group in section_groups:
+                section_groups[section_groups.index(section_group)].sections.append(section)
+            else:
+                section_groups.append(section_group)
+            continue
+        for section_group in all_section_groups:
+            if section in section_group.sections:
+                if section_group in section_groups:
+                    current_rounds_per_group[str(section_group.id)].append(dance_round)
+                else:
+                    section_groups.append(section_group)
+                    current_rounds_per_group[str(section_group.id)] = [dance_round]
+                break
+    heat_tables_per_group = {}
+    for section_group in section_groups:
+        section_ids = [section.id for section in section_group.sections]
+        heat_table = HeatTables.merge_running(section_ids)
+        if heat_table is not None:
+            heat_tables_per_group[str(section_group.id)] = [heat_table.to_html()]
     context = {
         'conf': Conf.get(),
-        'current_rounds': DanceRounds.get_running(),
-        'finished_sections': Sections.get_finished(),
-        'heat_table': heat_table
+        'section_groups': section_groups,
+        'heat_tables_per_group': heat_tables_per_group,
+        'current_rounds_per_group': current_rounds_per_group,
+        'finished_sections': Sections.get_finished()
     }
     return render(request, 'pydanceweb/index.html', context)
 

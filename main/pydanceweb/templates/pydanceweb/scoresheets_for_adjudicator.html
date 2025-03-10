@@ -3,21 +3,24 @@
 {% block content %}
 {% for dance_round in current_rounds %}
 {% if not forloop.first %}
-<h1 class="page-break-before">{{ conf.name }}</h1>
+<h1 class="page-break-before print-only">{{ conf.name }}</h1>
 {% endif %}
 {% for adjudicator in adjudicators_per_section|get_item:dance_round.section_id %}
 {% if not forloop.first %}
-<h1 class="page-break-before">{{ conf.name }}</h1>
+<h1 class="page-break-before print-only">{{ conf.name }}</h1>
+{% endif %}
+{% for dance in dance_round.dances %}
+{% if not forloop.first %}
+<h1 class="page-break-before print-only">{{ conf.name }}</h1>
 {% endif %}
 <h2>{{ dance_round.name }} ({{ dance_round.section_id }})</h2>
 <h3>Wertungsrichter {{ adjudicator }}</h3>
 <h4>{{ dance_round.competitors|length }} Teilnehmer</h4>
-{% for dance in dance_round.dances %}
 <div>
   <div>
     {% if dance_round.is_final %}
     <p>Bitte nur die Plätze 1-{{ dance_round.competitors|length }} vergeben und keine Platzierung doppelt.</p>
-    <fieldset class="final">
+    <fieldset class="final avoid-page-break-inside">
       <h3>{{ dance.id }}</h3>
       <div class="row">
         <div class="six columns">
@@ -37,7 +40,7 @@
     {% else %}
     <p>Bitte insgesamt <b>{{ dance_round.callback_wish }} Kreuze</b> vergeben</p>
     {% for heat in heat_dict|get_item:dance_round.section_id|get_item:dance_round.id|get_item:dance.id %}
-    <fieldset class="heat">
+    <fieldset class="heat avoid-page-break-inside">
         <h3>{{ dance.id }} - Heat {{ heat.no }}/{{ heat_dict|get_item:dance_round.section_id|get_item:dance_round.id|get_item:dance.id|length }}</h3>
         <div class="callback_mark_wrapper">
             <h4>Paar</h4>

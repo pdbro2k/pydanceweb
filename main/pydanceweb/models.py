@@ -645,9 +645,10 @@ class HeatTables:
         HeatTables.save(heat_table,section_id,round_id)
 
 
-    def merge_running():
-        # TODO: split by section groups
+    def merge_running(section_ids=[]):
         current_rounds = [dance_round for dance_round in DanceRounds.get_running() if not dance_round.is_final]
+        if len(section_ids) > 0:
+            current_rounds = [dance_round for dance_round in current_rounds if dance_round.section_id in section_ids]
         if len(current_rounds) < 1:
             return
         for i, dance_round in enumerate(current_rounds):

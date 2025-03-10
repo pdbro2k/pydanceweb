@@ -8,7 +8,7 @@
   {% csrf_token %}
   <p>Bitte insgesamt <b>{{ dance_round.callback_wish }} Kreuze</b> vergeben</p>
   {% for heat in heats %}
-  <fieldset class="heat">
+  <fieldset class="heat avoid-page-break-inside">
       <h3>{{ dance_id }} - Heat {{ heat.no }}/{{ heats|length }}</h3>
       <div class="row">
           <div class="six columns callback_mark_wrapper">

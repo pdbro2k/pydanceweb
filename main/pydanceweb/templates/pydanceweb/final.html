@@ -7,7 +7,7 @@
 <p>Bitte nur die Plätze 1-{{ dance_round.competitors|length }} vergeben und keine Platzierung doppelt.</p>
 <form method="post">
   {% csrf_token %}
-  <fieldset class="final">
+  <fieldset class="final avoid-page-break-inside">
       <h3>{{ dance_id }}</h3>
       <div class="row">
           <div class="six columns">

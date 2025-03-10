@@ -1,11 +1,15 @@
 {% extends 'pydanceweb/base.html' %}
 
 {% block content %}
-{% if heat_table %}
+{% for section_group in section_groups %}
 <div class="row">
+  {% if not forloop.first %}
+  <h1 class="page-break-before print-only">{{ conf.name }}</h1>
+  {% endif %}
+  <h2>{{ section_group.name }}</h2>
   <div class="four columns round_links">
     <h2>Laufende Runden</h2>
-    {% for dance_round in current_rounds %}
+    {% for dance_round in current_rounds_per_group|get_item:section_group.id %}
     {% if not dance_round.is_final %}
     <div>
       <a href="{% url 'show_heats' dance_round.section_id dance_round.id %}" class="button">{{ dance_round.name }} ({{ dance_round.section_id }})</a>
@@ -15,10 +19,12 @@
   </div>
   <div class="eight columns">
     <h2>Rundenauslosung</h2>
+    {% for heat_table in heat_tables_per_group|get_item:section_group.id %}
     {% autoescape off %}{{ heat_table }}{% endautoescape %}
+    {% endfor %}
   </div>
 </div>
-{% endif %}
+{% endfor %}
 
 {% if finished_sections %}
 <div class="row no-print">
