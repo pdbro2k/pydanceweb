@@ -307,4 +307,7 @@ While the app is fully functional (especially for single dance sections), there 
 - make it possible to redraw the heats from the tournament desk heat view
 - make it possible to add competitors to running sections
 - make it possible to also use rule 10 for additional awards
+- make it possible to define an award rule that checks whether a given place in a final is reached
+- make it possible to generate a result file that also lists the max placing in case of a tie
+- make it possible to generate a result file that also lists the number of competitors that performed worse
 - make it possible to add a redance round
