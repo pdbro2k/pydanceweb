@@ -5,6 +5,7 @@ from .award_calculator import *
 
 from glob import glob
 import json
+import numpy as np
 import os
 import shutil
 
@@ -309,7 +310,7 @@ class Sections:
             return pd.read_csv(filepath, index_col=0)
         # set place to 1 for all competitors if there are no results yet
         place_df = pd.DataFrame(index=section.competitors)
-        place_df['place'] = 1
+        place_df['place'] = np.nan
         return place_df
 
 
