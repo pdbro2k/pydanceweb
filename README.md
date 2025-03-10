@@ -21,6 +21,7 @@ It contains the following key value pairs:
 - `"dances"`: a dictionary in the form `"SOME_ID": "SOME_NAME"` listing all dances that may appear in any section
 - `"sections"`: a dictionary in the form `"SOME_ID": "SOME_NAME"` of all sections (i.e. "subcompetitions")
 - `"dances_per_section"`: a dictionary in the form `"SECTION_ID": ["DANCE_ID_1", ...]` that expresses which dance is danced in which section. Please ensure that every ID is defined as a key in their respective dictionaries. Please note that you may also define a section without dances e.g. if you want to restrict award results to only certain competitors.
+- `"additional_dances_per_section"`: a dictionary in the form `"SECTION_ID": ["DANCE_ID_1", ...]` that expresses which dance(s) shall not be danced in the first round but may be added later in which section. Please ensure that every ID is defined as a key in their respective dictionaries and is mapped to the respective section via `"dances_per_section"`. Please note that this dictionary is completely optional and you also do not need to add empty lists for sections without additional dances.
 - `"registration_only_sections"`: an OPTIONAL list in the form `["SECTION_ID_1", ...]` that declares which sections should only be used as additional fields for registration but should not be displayed in any other view
 - `"section_groups"`: a dictionary in the form `"SOME_ID": "SOME_NAME"` of all sections that should be grouped in the tournament desk view under the given name as header
 - `"sections_per_group"`: a dictionary in the form `"SECTION_GROUP_ID": ["SECTION_ID_1", ...]` that expresses which sections should be grouped under which header in the tournament desk view. Please ensure that every ID is defined as a key in their respective dictionaries.
@@ -120,6 +121,10 @@ Please also note that starting a round will again change its status in the tourn
 The heat table will be saved to `data/sections/SECTION_ID/ROUND_NO/SECTION_ID_ROUND_NO_heats.csv` and can be edited externally if necessary.
 
 #### Starting a Round of a Multi-Dance Sections
+
+If you specified additional dances for a multi-dance section, you can add them to any non-first rounds in the preparation view which you otherwise only use to set the callback wish and maximum heat size:
+
+![c.f. screenshots/desk_3_init_round_additional-dance_example.png](screenshots/desk_3_init_round_additional-dance_example.png)
 
 In case of multi-dance sections the heats view will include buttons to move between the different dances:
 

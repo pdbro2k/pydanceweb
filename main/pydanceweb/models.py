@@ -348,12 +348,13 @@ class DanceRounds:
             return
         dance_round = DanceRound(DanceRounds._build_id(), DanceRounds._build_name())
         dance_round.section_id = section.id
-        dance_round.dances = section.dances
+        additional_dance_ids = [additional_dance.id for additional_dance in section.additional_dances]
+        dance_round.dances = [dance for dance in section.dances if dance.id not in additional_dance_ids]
         dance_round.competitors = section.competitors
         DanceRounds.save(dance_round)
         return dance_round
 
-    def create_next(current_dance_round, callback_count, added_dance_ids=[]):
+    def create_next(current_dance_round, callback_count):
         if not current_dance_round:
             return
         callback_option = CallbackMarkTables.get_callback_option(current_dance_round.section_id, current_dance_round.id, callback_count)
@@ -361,8 +362,6 @@ class DanceRounds:
         dance_round.name = DanceRounds._build_name(dance_round.id, callback_option.is_final)
         dance_round.section_id = current_dance_round.section_id
         dance_round.dances = current_dance_round.dances
-        for dance_id in added_dance_ids:
-            dance_round.dances.append(Dances.get(dance_id))
         dance_round.competitors = [int(competitor) for competitor in callback_option.competitors]
         if callback_option.is_final:
             dance_round.is_final = True

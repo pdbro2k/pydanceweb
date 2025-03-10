@@ -1,6 +1,19 @@
 {% extends 'pydanceweb/base_round.html' %}
 
 {% block form_inputs %}
+      
+      {% if section.additional_dances and dance_round.id > 1 %}
+      <dt>Weitere Tänze</dt>
+      <dd>
+        <select name="add_dances" id="add_dances">
+        <option value="">-</option>
+        {% for dance in section.additional_dances %}
+        <option value="{{ dance.id }}">{{ dance.name }}</option>
+        {% endfor %}
+        </select>
+      </dd>
+      {% endif %}
+      
       {% if not dance_round.is_final %}
       <dt>Kreuzvorgabe</dt>
       <dd>

@@ -21,11 +21,15 @@
         "PK": "Polka-Turnier"
     },
     "dances_per_section": {
-        "STD_AM": ["LW", "TG", "QS"],
-        "LAT_AM": ["CC", "RB", "JV"],
+        "STD_AM": ["LW", "TG", "SF", "QS"],
+        "LAT_AM": ["SB", "CC", "RB", "JV"],
         "STD_PRO": ["LW", "TG", "WW", "SF", "QS"],
         "LAT_PRO": ["SB", "CC", "RB", "PD", "JV"],
         "PK": ["PK"]
+    },
+    "additional_dances_per_section": {
+        "STD_AM": ["SF"],
+        "LAT_AM": ["SB"]
     },
     "section_groups": {
         "STD": "Standardturniere",

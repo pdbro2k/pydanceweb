@@ -5,9 +5,6 @@
       <dt>Tänze</dt>
       <dd>
         {% include "pydanceweb/joined_id_list.html" with list=section.dances %}
-        {% if section.additional_dances %}
-        <i>+ {% include "pydanceweb/joined_id_list.html" with list=section.additional_dances %}</i>
-        {% endif %}
       </dd>
       <dt>Wertungsrichter</dt>
       <dd id="adjudicator_count_{{section.id}}">{{ section.adjudicators|length }}</dd>

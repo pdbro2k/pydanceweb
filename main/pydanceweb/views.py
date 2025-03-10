@@ -142,8 +142,7 @@ def _prepare_round(request, section_id, round_id):
         if not current_dance_round:
             return HttpResponse("Runde nicht gefunden")
         callback_count = int(request.POST["callback_count"])
-        added_dance_ids = request.POST.getlist("add_dances")
-        dance_round = DanceRounds.create_next(current_dance_round, callback_count, added_dance_ids)
+        dance_round = DanceRounds.create_next(current_dance_round, callback_count)
 
     if not dance_round:
         return HttpResponse('Runde nicht gefunden')
@@ -174,6 +173,7 @@ def _handle_final_round(request, dance_round, section):
     if not dance_round.is_running:
         if request.POST:
             dance_round.is_running = True
+            _add_additional_dances(dance_round, section, request.POST.getlist("add_dances"))
             DanceRounds.save(dance_round)
 
     final_tables = []
@@ -195,6 +195,7 @@ def _handle_preliminary_round(request, dance_round, section):
     if request.POST:
         dance_round.callback_wish = int(request.POST['callback_wish'])
         dance_round.max_heat_size = int(request.POST['heat_size'])
+        _add_additional_dances(dance_round, section, request.POST.getlist("add_dances"))        
         DanceRounds.save(dance_round)
     callback_table = CallbackMarkTables.create(section.id, dance_round.id)
     context = {
@@ -206,6 +207,15 @@ def _handle_preliminary_round(request, dance_round, section):
     }
     return render(request, 'pydanceweb/preliminary_round.html', context)
 
+def _add_additional_dances(dance_round, section, added_dance_ids):
+    if len(added_dance_ids) > 0:
+        # remove added dance from additional dance list
+        section.additional_dances = [dance for dance in section.additional_dances if dance.id not in added_dance_ids]
+        Sections.save(section)
+
+        # add dance to dances
+        additional_dance_ids = [additional_dance.id for additional_dance in section.additional_dances]
+        dance_round.dances = [dance for dance in section.dances if dance.id not in additional_dance_ids]
 
 def handle_heats(request, section_id, round_id, dance_id=""):
     section = Sections.get(section_id)
