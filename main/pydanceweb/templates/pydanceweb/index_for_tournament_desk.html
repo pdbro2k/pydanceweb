@@ -1,12 +1,15 @@
 {% extends 'pydanceweb/base.html' %}
 
 {% block content %}
-<a href="{% url 'show_competitor_overview' %}" class="button">zur Teilnehmerliste</a>
-<a href="{% url 'show_adjudicator_overview' %}" class="button">zur Wertungsrichterliste</a>
-<a href="{% url 'show_index' %}" class="button">zur Rundenauslosung</a>
-<a href="{% url 'show_current_adjudicator_sheets' %}" class="button">zu den Wertungsrichterbögen</a>
+<a href="{% url 'show_competitor_overview' %}" class="button no-print">zur Teilnehmerliste</a>
+<a href="{% url 'show_adjudicator_overview' %}" class="button no-print">zur Wertungsrichterliste</a>
+<a href="{% url 'show_index' %}" class="button no-print">zur Rundenauslosung</a>
+<a href="{% url 'show_current_adjudicator_sheets' %}" class="button no-print">zu den Wertungsrichterbögen</a>
 
 {% for section_group in conf.section_groups %}
+{% if not forloop.first %}
+<h1 class="print-only">{{ conf.name }}</h1>
+{% endif %}
 <div class="dance_section_group page-break-after">
     <h2>{{ section_group.name }}</h2>
     {% for section in section_group.sections %}
@@ -14,6 +17,7 @@
     {% endfor %}
 </div>
 {% endfor %}
+<h1 class="print-only">{{ conf.name }}</h1>
 <h2>Weitere</h2>
 {% for section in ungrouped_sections %}
 {% if section in conf.registration_only_sections %}
@@ -23,12 +27,12 @@
 {% endfor %}
 
 {% if conf.awards %}
-<h2>Sonderwertungen</h2>
+<h2 class="no-print">Sonderwertungen</h2>
 {% for award in conf.awards %}
-<a href="{% url 'handle_award' award.id %}" class="button">{{ award.name }} ausrechnen</a>
+<a href="{% url 'handle_award' award.id %}" class="button no-print">{{ award.name }} ausrechnen</a>
 {% endfor %}
 {% endif %}
-<h2>Ergebnisübersicht</h2>
-<a href="{% url 'finalize' %}" class="button">zur Ergebnisübersicht</a>
+<h2 class="no-print">Ergebnisübersicht</h2>
+<a href="{% url 'finalize' %}" class="button no-print">zur Ergebnisübersicht</a>
 
 {% endblock %}

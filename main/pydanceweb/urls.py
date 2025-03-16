@@ -72,8 +72,7 @@ urlpatterns = [
     path('<section_id>/<int:round_id>/', views.show_heats, name='show_heats'),
     path('<section_id>/<int:round_id>/<dance_id>', views.show_heats, name='show_heats'),
     path('<section_id>/<int:round_id>/<dance_id>/', views.show_heats, name='show_heats'),
-    # MEMO: nice to have: adjudicator sheets for all current rounds
-
+    
     # open results/ awards views
     path('<section_id>/results', views.show_results, name='show_results'),
     path('<section_id>/results/', views.show_results, name='show_results'),

@@ -1,7 +1,7 @@
 {% extends 'pydanceweb/base.html' %}
 
 {% block content %}
-<h2>Wertungsrichter {{ adjudicator_id }}</h2>
+<h2>{{ title }}</h2>
 {% for dance_round in current_rounds %}
 <div class="row">
   {% if dance_round.is_final %}

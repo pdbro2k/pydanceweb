@@ -10,6 +10,10 @@
 <div class="row page-break-after">
   {% include "pydanceweb/place_table.html" with place_table=place_table %}
 </div>
+<div class="print-only">
+  <h1>{{ conf.name }}</h1>
+</div>
+<h2 class="print-only">{{ section.name }} - Ergebnisse</h2>
 {% endif %}
 <div class="row">
   {% for dance_round, callback_table in callback_tables_per_round %}

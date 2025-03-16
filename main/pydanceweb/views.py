@@ -23,6 +23,7 @@ def show_competitor_overview(request):
     unstarted_sections = Sections.get_running() + Sections.get_finished()
     context = {
         'conf': conf,
+        'title': 'Teilnehmer',
         'competitor_table': render_frame(table.to_frame()),
         'section_ids': section_ids,
         'unstarted_sections': unstarted_sections
@@ -67,6 +68,7 @@ def register_competitor(request, competitor=""):
     preregistered_sections = [Section(section_id) for section_id in table.get_preregistrations(int(competitor))]
     context = {
         'conf': conf,
+        'title': f'Paar {competitor} Registrierung',
         'competitor_id': competitor,
         'lead': CompetitorStartTables.get_lead(table, competitor),
         'follow': CompetitorStartTables.get_follow(table, competitor),
@@ -83,6 +85,7 @@ def show_adjudicator_overview(request):
     section_ids = table.get_sections()
     context = {
         'conf': conf,
+        'title': 'Wertungsrichter',
         'adjudicator_table': render_frame(table.to_frame()),
         'section_ids': section_ids,
         'base_url': request.build_absolute_uri('/')[:-1]
@@ -105,8 +108,9 @@ def show_tournament_desk_index(request):
             dance_rounds_per_section[initiated_section.id] = DanceRounds.get_all(section.id)
     context = {
         'conf': conf,
+        'title': 'Gesamtübersicht',
         'ungrouped_sections': conf.get_ungrouped_sections(),
-        'dance_rounds_per_section': dance_rounds_per_section,
+        'dance_rounds_per_section': dance_rounds_per_section
     }
     return render(request, 'pydanceweb/index_for_tournament_desk.html', context)
 
@@ -122,6 +126,7 @@ def handle_section(request, section_id):
     next_round_id = last_round.id + 1 if last_round else 1
     context = {
         'conf': Conf.get(),
+        'title': section_id,
         'section': section,
         'dance_rounds': dance_rounds,
         'last_round': last_round,
@@ -184,6 +189,7 @@ def _handle_final_round(request, dance_round, section):
 
     context = {
         'conf': Conf.get(),
+        'title': f'{section.id} Endrunde',
         'section': section,
         'dance_round': dance_round,
         'final_tables_per_dance': zip(dance_round.dances, final_tables),
@@ -202,6 +208,7 @@ def _handle_preliminary_round(request, dance_round, section):
     callback_table = CallbackMarkTables.create(section.id, dance_round.id)
     context = {
         'conf': Conf.get(),
+        'title': f'{section.id} {dance_round.name}',
         'section': section,
         'dance_round': dance_round,
         'callback_table': render_frame(callback_table.to_frame()),
@@ -253,6 +260,7 @@ def handle_heats(request, section_id, round_id, dance_id=""):
 
     context = {
         'conf': Conf.get(),
+        'title': f'{section.id} {dance_round.name}',
         'section': section,
         'dance_round': dance_round,
         'dance_id': dance_id,
@@ -301,14 +309,17 @@ def finalize(request):
     results_table = OverallResults.create()
     context = {
         'conf': Conf.get(),
+        'title': 'Ergebnisübersicht',
         'results_table': results_table.to_html(),
     }
     return render(request, 'pydanceweb/overall_results.html', context)
 
 # adjudicator views
 def show_current_adjudicator_rounds(request, adjudicator_id):
+    adjudicator_id = adjudicator_id.upper() # ignore case
     context = {
         'conf': Conf.get(),
+        'title': f'Wertungsrichter {adjudicator_id}',
         'adjudicator_id': adjudicator_id,
         'current_rounds': DanceRounds.get_running(adjudicator_id),
     }
@@ -332,6 +343,7 @@ def show_current_adjudicator_sheets(request):
         }
     context = {
         'conf': Conf.get(),
+        'title': 'Wertungsrichterbögen',
         'current_rounds': current_rounds,
         'adjudicators_per_section': adjudicators_per_section,
         'heat_dict': heat_dict,
@@ -374,6 +386,7 @@ def judge_heats(request, adjudicator_id, section_id, round_id, dance_id=''):
     marked_competitors = CallbackMarks.get(adjudicator_id, section_id, round_id, dance_id)
     context = {
         'conf': Conf.get(),
+        'title': f'{section_id} {dance_round.name} | Wertungsrichter {adjudicator_id}',
         'adjudicator_id': adjudicator_id,
         'dance_round': dance_round,
         'dance_id': dance_id,
@@ -400,6 +413,7 @@ def judge_final(request, adjudicator_id, section_id, dance_id=''):
     final_marks = FinalMarks.get(adjudicator_id, section_id, dance_round.id, dance_id)
     context = {
         'conf': Conf.get(),
+        'title': f'{section_id} {dance_round.name} | Wertungsrichter {adjudicator_id}',
         'adjudicator_id': adjudicator_id,
         'section_id': section_id,
         'dance_round': dance_round,
@@ -412,6 +426,7 @@ def judge_final(request, adjudicator_id, section_id, dance_id=''):
 def show_index_for_chair(request):
     context = {
         'conf': Conf.get(),
+        'title': 'Laufende Runden',
         'current_rounds': DanceRounds.get_running(),
     }
     return render(request, 'pydanceweb/index_for_chair.html', context)
@@ -457,6 +472,7 @@ def show_index(request):
             heat_tables_per_group[str(section_group.id)] = [heat_table.to_html()]
     context = {
         'conf': Conf.get(),
+        'title': conf.name,
         'section_groups': section_groups,
         'heat_tables_per_group': heat_tables_per_group,
         'current_rounds_per_group': current_rounds_per_group,
@@ -490,6 +506,7 @@ def show_heats(request, section_id, round_id, dance_id="", is_chair=False):
     heat_table = HeatTables.get(section_id, round_id)
     context = {
         'conf': Conf.get(),
+        'title': f'{section_id} {dance_round.name}',
         'section': section,
         'dance_round': dance_round,
         'dance_id': dance_id,
@@ -508,6 +525,7 @@ def show_results(request, section_id, resetable=False):
 
     context = {
         'conf': Conf.get(),
+        'title': f'{section.id} Ergebnisse',
         'section': section,
         'resetable': resetable
     }
@@ -536,6 +554,7 @@ def show_award_results(request, award_id):
     award_table = Awards.get_results(award_id)
     context = {
         'conf': Conf.get(),
+        'title': f'{award.id} Ergebnisse',
         'award': award,
         'award_table': render_frame(award_table),
     }
