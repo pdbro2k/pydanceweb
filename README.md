@@ -8,7 +8,7 @@ This Django app can be used to run (and analyze) dancing competitions.
 - build a python environment (e.g. with venv): `python -m venv pydance_env`
 - activate the environment:
     - Win (cmd.exe): `pydance_env\Scripts\activate.bat`
-    - Win (PowerShell): `pydance_env\Scripts\Activate.ps1`
+    - Win (PowerShell): `pydance_env\Scripts\Activate`
     - Mac/Linux: `source pydance_env/bin/activate`
 - run `pip install -r requirements.txt` in your python environment
 

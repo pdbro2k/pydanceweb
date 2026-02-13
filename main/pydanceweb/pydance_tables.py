@@ -516,7 +516,7 @@ class FinalSummary(CallbackMarkTable):
             if row[self._rule_9_calculation_column] > current_sum:
                 current_sum = row[self._rule_9_calculation_column]
                 current_place = n
-            self._place_df[self._place_column].loc[competitor] = current_place
+            self._place_df.loc[competitor, self._place_column] = current_place
 
     def _apply_rule_10(self):
         df = pd.DataFrame(columns=[SkatingTable.build_calculation_column(x + 1) for x in range(len(self._df))])
